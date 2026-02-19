@@ -1,0 +1,5 @@
+[wrap-file]
+directory = pmix
+source_url = https://github.com/pmix/pmix-abi/archive/refs/tags/pmix-standard-v5.0.tar.gz
+source_filename = pmix-standard-v5.0.tar.gz
+source_hash = 962cefe63ad882bee5e005a74222e6f9b931b52f65b6f1b6efc42c2e32507712

@@ -1,0 +1,25 @@
+[project]
+name = "foehn"
+version = "0.1.0"
+description = "PMIx bootstrap method for modern AI/ML applications"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pytest",
+    "numpy",
+    "torch>2.0.0"
+]
+
+[build-system]
+requires = ["meson-python", "ninja","meson"]
+build-backend = "mesonpy"
+
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "meson-python",
+    "ninja",
+    "meson>=1.10.1",
+]
+
