@@ -36,3 +36,9 @@ just setup # setup build library
 just build # compile code with meson
 just test  # test the library, requires prrte
 ```
+
+
+## Roadmap
+
+ - [ ] Support for NVSCHMEM (pytorch)
+ - [ ] Support for JAX
