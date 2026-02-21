@@ -22,5 +22,17 @@ for PyTorch distributed jobs on modern HPC clusters.
 Just run
 ```python
 import foehn
-foehn.pytorch.init_process_group(argument1, argument2, keyword2=parameter)
+foehn.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=pytorch_parameter)
+```
+
+## Installation
+Library can be compiled from soure using meson with dependences manged with uv. It requires PMIx library supporting version >5.0.
+It can be locally tested using [prrte](https://github.com/openpmix/prrte). To build and test it one can use commands provided in justfile (requires just installed).
+
+
+```
+uv sync # download dependencies
+just setup # setup build library
+just build # compile code with meson
+just test  # test the library, requires prrte
 ```
