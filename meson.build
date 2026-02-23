@@ -12,38 +12,13 @@ py.install_sources(
   subdir: 'foehn'
 )
 pmix_dep = dependency('pmix', required: true)
+pmix_abi_inc = include_directories('subprojects/pmix-abi-pmix-standard-v5.0')
+pmix_abi_dep = declare_dependency(include_directories: pmix_abi_inc)
 
-pmix_inc = include_directories('subprojects/pmix-abi-pmix-standard-v5.0')
 py.extension_module(
   'PMIx_core',
   'src/bindings/core.c',
-  dependencies: [pmix_dep],
-  include_directories: pmix_inc,
+  dependencies: [pmix_dep, pmix_abi_dep],
   install: true,
   subdir: 'foehn'
-)
-
-
-prterun = find_program('prterun', required: true)
-test('pmix_distributed_test', 
-  prterun,
-  args: [
-    '-n', '2',
-    '--map-by', ':OVERSUBSCRIBE', # Force it to ignore slot limits
-    '--host', 'localhost',
-    'uv','run',
-    files('tests/test_pmix.py')
-  ],
-  timeout: 30
-)
-test('pytorch_distributed_test', 
-  prterun,
-  args: [
-    '-n', '2',
-    '--map-by', ':OVERSUBSCRIBE', # Force it to ignore slot limits
-    '--host', 'localhost',
-    'uv','run',
-    files('tests/test_pytorch_init.py')
-  ],
-  timeout: 30
 )

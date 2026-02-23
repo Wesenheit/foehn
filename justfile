@@ -1,12 +1,6 @@
-num_procs := "2"
-export PYTHONPATH := "build/src"
-    
-setup:
-    uvx meson setup build
-
 build:
-    uvx meson compile -C build
+    uv sync
 
-test: build
+test *args: build
     uv pip install -e . --no-build-isolation
-    uv run pytest
+    uv run pytest {{args}}

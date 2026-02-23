@@ -47,7 +47,7 @@ def test_pytorch_init_isolated(nprocs):
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     assert result.returncode == 0, f"Subprocess failed with stderr: {result.stderr}"
-    assert result.stdout.count("PYTORCH_WORKER_CLEAN_EXIT") == 2
+    assert result.stdout.count("PYTORCH_WORKER_CLEAN_EXIT") == int(nprocs)
 
 
 if __name__ == "__main__":
