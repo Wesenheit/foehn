@@ -27,7 +27,7 @@ Py_ssize_t get_string_from_python(PyObject *val_obj, const char **out) {
 }
 
 static int PMIxObjInit(PyObject *self, PyObject *args) {
-  PyPMIx *self_pmix = self;
+  PyPMIx *self_pmix = (PyPMIx *)self;
   if (!PyArg_ParseTuple(args, "i", &self_pmix->timeout)) {
     return -1;
   }
@@ -131,7 +131,7 @@ static PyObject *set(PyObject *self, PyObject *args) {
 
 // 4. GET
 static PyObject *get(PyObject *self, PyObject *args) {
-  PyPMIx *self_pmix = self;
+  PyPMIx *self_pmix = (PyPMIx *)self;
 
   PyObject *key_obj;
   const char *key;
@@ -197,7 +197,7 @@ static PyObject *get(PyObject *self, PyObject *args) {
 
 // 5. WATI
 static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
-  PyPMIx *self_pmix = self;
+  PyPMIx *self_pmix = (PyPMIx *)self;
   PyObject *keys_list;
   int _dummy_timeout;
   if (!PyArg_ParseTuple(args, "O|i", &keys_list, &_dummy_timeout)) {
