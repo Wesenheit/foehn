@@ -21,3 +21,5 @@ test = [
     "numpy",
     "torch>2.0.0",
 ]
+[tool.meson-python.args]
+setup = ['--wrap-mode=forcefallback']
