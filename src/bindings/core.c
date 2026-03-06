@@ -1,5 +1,3 @@
-#include "pmix_macros.h"
-#include "pmix_types.h"
 #include <Python.h>
 #include <pmix.h>
 #include <string.h>

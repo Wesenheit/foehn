@@ -12,13 +12,11 @@ py.install_sources(
   subdir: 'foehn'
 )
 pmix_dep = dependency('pmix', required: true)
-pmix_abi_inc = include_directories('subprojects/pmix-abi')
-pmix_abi_dep = declare_dependency(include_directories: pmix_abi_inc)
 
 py.extension_module(
   'PMIx_core',
   'src/bindings/core.c',
-  dependencies: [pmix_dep, pmix_abi_dep],
+  dependencies: [pmix_dep,],
   install: true,
   subdir: 'foehn'
 )
