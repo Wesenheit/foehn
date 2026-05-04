@@ -5,22 +5,9 @@ description = "PMIx bootstrap method for modern AI/ML applications"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "pytest",
-    "torch"
+    "torch",
+    "numpy"
 ]
 [build-system]
-requires = ["meson-python", "ninja","meson"]
-build-backend = "mesonpy"
-[dependency-groups]
-dev = [
-    "pytest",
-    "meson-python",
-    "ninja",
-    "meson>=1.10.1",
-]
-test = [
-    "numpy",
-    "torch>2.0.0",
-]
-[tool.meson-python.args]
-setup = ['--wrap-mode=forcefallback']
+requires = ["setuptools>=61.0", "wheel", "pybind11"]
+build-backend = "setuptools.build_meta"
