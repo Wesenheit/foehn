@@ -26,11 +26,13 @@ foehn.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=
 ```
 
 ## Installation
-Library can be compiled from soure using meson with dependences manged with uv. It requires PMIx library supporting version >5.0.
-It can be locally tested using [prrte](https://github.com/openpmix/prrte). To build and test it one can use commands provided in justfile (requires just installed).
+Library can be compiled from soure using meson with dependences manged with `pixi`. It requires PMIx library supporting version >5.0.
+It can be locally tested using [prrte](https://github.com/openpmix/prrte) and more recently with OpenMPI provided by conda channel.
+To build and test it one can use commands provided in justfile (requires `pixi` installed).
 ```
-just build # compile code, equivalent to calling uv sync that also downloads dependencies
-just test --nprocs 4 # test the library on 4 processes, requires prrte
+pixi run build #downloads everything and builds
+pixi run test #launches pytest and uses openmpi>5.0 to launch the test
+pixi run ci # does both at the same time
 ```
 
 
