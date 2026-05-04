@@ -25,7 +25,7 @@ def test_pmix_rank_validity(nprocs):
     env["FOEHN_WORKER_MODE"] = "1"
 
     cmd = [
-        "prterun",
+        "mpirun",
         "-n",
         nprocs,
         "-x",

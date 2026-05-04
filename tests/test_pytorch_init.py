@@ -33,7 +33,7 @@ def test_pytorch_init_isolated(nprocs):
     env[WORKER_ENV_VAR] = "1"
 
     cmd = [
-        "prterun",
+        "mpirun",
         "-n",
         nprocs,
         "-x",

@@ -14,3 +14,6 @@ subprojects/*
 !subprojects/*.wrap
 build/
 builddir/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
