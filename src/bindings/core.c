@@ -1,7 +1,9 @@
+#include "pmix_types.h"
 #include <Python.h>
 #include <pmix.h>
 #include <string.h>
 #include <structmember.h>
+#include <unistd.h>
 
 static struct {
   pmix_proc_t proc;
@@ -31,6 +33,7 @@ static int PMIxObjInit(PyObject *self, PyObject *args) {
   if (!PyArg_ParseTuple(args, "i", &self_pmix->timeout)) {
     return -1;
   }
+  // self_pmix->timeout = 30;
 
   if (GlobState.init) {
     PyErr_SetString(PyExc_TypeError, "PMIx already started!");
@@ -148,7 +151,8 @@ static PyObject *get(PyObject *self, PyObject *args) {
   PMIX_INFO_CONSTRUCT(&info[0]);
   PMIX_INFO_CONSTRUCT(&info[1]);
 
-  PMIx_Info_load(&info[0], PMIX_WAIT, NULL, PMIX_BOOL);
+  int wait_flag = 0;
+  PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
   PMIx_Info_load(&info[1], PMIX_TIMEOUT, &self_pmix->timeout, PMIX_INT);
 
   pmix_proc_t proc;
@@ -197,6 +201,8 @@ static PyObject *get(PyObject *self, PyObject *args) {
 
 // 5. WATI
 static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
+  float delta_T = 0.1;   // Fraction of second for every retry
+  float total_sleep = 0; // total amount of time spend on sleeping
   PyPMIx *self_pmix = (PyPMIx *)self;
   PyObject *keys_list;
   int _dummy_timeout;
@@ -216,37 +222,56 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
 
   PMIX_INFO_CONSTRUCT(&info[0]);
   PMIX_INFO_CONSTRUCT(&info[1]);
-  PMIx_Info_load(&info[0], PMIX_WAIT, NULL, PMIX_BOOL);
+  int wait_flag = 0;
+  PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
   PMIx_Info_load(&info[1], PMIX_TIMEOUT, &self_pmix->timeout, PMIX_INT);
-
   PMIX_PROC_CONSTRUCT(&proc);
   PMIX_PROC_LOAD(&proc, GlobState.proc.nspace, PMIX_RANK_UNDEF);
 
+  bool found[n];
   for (Py_ssize_t i = 0; i < n; i++) {
-    PyObject *key_obj = PyList_GetItem(keys_list, i);
-    const char *key;
-    if (PyUnicode_Check(key_obj)) {
-      key = PyUnicode_AsUTF8(key_obj);
-    } else if (PyBytes_Check(key_obj)) {
-      key = PyBytes_AsString(key_obj);
-    } else {
-      PyErr_SetString(PyExc_TypeError, "key must be str or bytes");
+    found[i] = 0;
+  }
+  int total_found = 0;
+
+  while (total_found < n) {
+    if (total_sleep > self_pmix->timeout) {
+      PyErr_SetString(PyExc_RuntimeError, "Timeout exceeded");
       goto err_cleanup;
     }
+    for (Py_ssize_t i = 0; i < n; i++) {
+      if (found[i])
+        continue;
+      PyObject *key_obj = PyList_GetItem(keys_list, i);
+      const char *key;
+      if (PyUnicode_Check(key_obj)) {
+        key = PyUnicode_AsUTF8(key_obj);
+      } else if (PyBytes_Check(key_obj)) {
+        key = PyBytes_AsString(key_obj);
+      } else {
+        PyErr_SetString(PyExc_TypeError, "key must be str or bytes");
+        goto err_cleanup;
+      }
 
-    pmix_value_t *val;
-    pmix_status_t rc = PMIx_Get(&proc, key, info, 2, &val);
+      pmix_value_t *val;
+      pmix_status_t rc = PMIx_Get(&proc, key, info, 2, &val);
 
-    if (rc == PMIX_ERR_TIMEOUT) {
-      PyErr_Format(PyExc_TimeoutError, "key '%s' not available within timeout",
-                   key);
-      goto err_cleanup;
-    } else if (rc != PMIX_SUCCESS) {
-      PyErr_SetString(PyExc_RuntimeError, PMIx_Error_string(rc));
-      goto err_cleanup;
+      if (rc == PMIX_ERR_TIMEOUT) {
+        PyErr_Format(PyExc_TimeoutError,
+                     "key '%s' not available within timeout", key);
+        goto err_cleanup;
+      } else if (rc == PMIX_ERR_NOT_FOUND) {
+        continue;
+      } else if (rc != PMIX_SUCCESS) {
+        PyErr_SetString(PyExc_RuntimeError, PMIx_Error_string(rc));
+        goto err_cleanup;
+      }
+      found[i] = 1;
+      total_found += 1;
+      PMIX_VALUE_RELEASE(val);
     }
-
-    PMIX_VALUE_RELEASE(val);
+    total_sleep += delta_T;
+    usleep(delta_T * 1000);
   }
 
   PMIX_INFO_DESTRUCT(&info[0]);
