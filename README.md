@@ -23,11 +23,18 @@ One can use `foehn` to start pytorch distributed job with one simple line
 import foehn
 foehn.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=pytorch_parameter)
 ```
+Jobs can be launched with any PMIx 5.0-compatible plugin, starting with `prrte`, some MPI implementations (OpenMPI 5.0),
+native job launcher plugins to SLURM or Flux. Example:
+```
+ prterun -n 16 python3 -c "import foehn; foehn.pytorch.init_process_group(); import torch; print(torch.distributed.get_rank())"
+```
+
+
 
 ## Installation
 Library can be compiled from source with standard `setuptools` and requires PMIx library supporting version >5.0.
 Development of the package is manged with `pixi` that can be used to also bring all necessary libraries for testing and development.
-It can be locally tested using [prrte](https://github.com/openpmix/prrte) and more recently with OpenMPI provided by `pixi`.
+It can be locally tested using `prrte` and more recently with OpenMPI provided by `pixi`.
 To build and test the library one can use commands provided in `pixi.toml`.
 ```
 pixi run build  #downloads everything and builds
