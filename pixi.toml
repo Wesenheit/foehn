@@ -34,6 +34,9 @@ noarch = false
 abi3 = true
 compilers = ["c",]
 
+[package.host-dependencies] 
+libpmix = ">=5.0"
+
 [tasks]
 build = "pip install --no-build-isolation -e ."
 test = "pytest tests -v"
