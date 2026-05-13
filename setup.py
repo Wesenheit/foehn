@@ -6,7 +6,9 @@ ext_modules = [
         sources=[
             "src/bindings/core.c",
         ],
-        include_dirs=["include", "src/pmix_headers"],
+        include_dirs=[
+            "include",
+        ],
         libraries=["pmix"],
         language="c",
         extra_compile_args=["-O3"],
