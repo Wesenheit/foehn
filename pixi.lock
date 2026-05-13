@@ -45,6 +45,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libnghttp2-1.68.1-h877daf1_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libnl-3.11.0-hb9d3cd8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-5.0.8-h31fc519_4.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-devel-5.0.8-ha770c72_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libprotobuf-6.33.5-h2b00c02_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libsqlite-3.53.0-hf4e2dac_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libssh2-1.11.1-hcf80075_0.conda
@@ -182,6 +183,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libnghttp2-1.68.1-h8f3e76b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libopenblas-0.3.33-openmp_he657e61_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libpmix-5.0.8-hddb0edd_4.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libpmix-devel-5.0.8-hce30654_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libprotobuf-6.33.5-h4a5acfd_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libsqlite-3.53.1-h1b79a29_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libssh2-1.11.1-h1590b86_0.conda
@@ -672,6 +674,16 @@ packages:
   purls: []
   size: 731098
   timestamp: 1770962978877
+- conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-devel-5.0.8-ha770c72_4.conda
+  sha256: 044df4b27fae2a4d4bba26ba128beb7f6bf0389e56f41031386cebdae3b3de08
+  md5: b3786adde259c9dd8c00bbd28b101532
+  depends:
+  - libpmix 5.0.8 h31fc519_4
+  license: BSD-3-Clause
+  license_family: BSD
+  purls: []
+  size: 219316
+  timestamp: 1770962980001
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libprotobuf-6.33.5-h2b00c02_0.conda
   sha256: afbf195443269ae10a940372c1d37cda749355d2bd96ef9587a962abd87f2429
   md5: 11ac478fa72cf12c214199b8a96523f4
@@ -2066,6 +2078,16 @@ packages:
   purls: []
   size: 530391
   timestamp: 1770963627741
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/libpmix-devel-5.0.8-hce30654_4.conda
+  sha256: 62c9f62a739d768898c5412c61924f3cb95468980b0b054164810a8f778656ca
+  md5: f4846b3b5f545b23933ad8ee4c0db7a1
+  depends:
+  - libpmix 5.0.8 hddb0edd_4
+  license: BSD-3-Clause
+  license_family: BSD
+  purls: []
+  size: 220333
+  timestamp: 1770963631843
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libprotobuf-6.33.5-h4a5acfd_0.conda
   sha256: 626852cd50690526c9eac216a9f467edd4cbb01060d0efe41b7def10b54bdb08
   md5: b839e3295b66434f20969c8b940f056a

@@ -12,7 +12,8 @@ version = "0.1.0"
 [dependencies]
 python = ">=3.11"
 openmpi = ">=5.0"
-libpmix = ">=5.0"
+libpmix-devel = ">=5.0"
+setuptools = "*"
 pkg-config = "*"
 pytest = "*"
 mpi4py = "*"
@@ -35,7 +36,8 @@ abi3 = true
 compilers = ["c",]
 
 [package.host-dependencies] 
-libpmix = ">=5.0"
+libpmix-devel = ">=5.0"
+setuptools = "*"
 
 [tasks]
 build = "pip install --no-build-isolation -e ."
