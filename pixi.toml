@@ -45,8 +45,11 @@ setuptools = "*"
 build = "pip install --no-build-isolation -e ."
 test = "pytest tests -v"
 ci = { depends-on = ["build", "test"] }
-wheel = "python -m build"
+
+#publishing and building
+wheel = "python -m build --wheel"
 audit = "auditwheel repair dist/*.whl -w wheelhouse/"
 check-wheel = "twine check wheelhouse/* dist/*.tar.gz"
 pre-publish = { depends-on = ["wheel","audit","check-wheel"]}
 clean = "rm -rf dist/ wheelhouse/ build/"
+publish-test = "twine upload --repository testpypi wheelhouse/*"

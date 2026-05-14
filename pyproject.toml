@@ -31,4 +31,3 @@ nvshmem = ["nvshmem4py","numpy>=1.26"]
 requires = ["setuptools>=61.0", "wheel", "pybind11"]
 build-backend = "setuptools.build_meta"
 
-
