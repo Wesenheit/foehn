@@ -17,6 +17,7 @@ builddir/
 # pixi environments
 .pixi/*
 ty.toml
+wheelhouse/
 !.pixi/config.toml
 *.so
 *.conda

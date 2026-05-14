@@ -14,20 +14,19 @@ python = ">=3.10"
 openmpi = ">=5.0"
 libpmix-devel = ">=5.0"
 setuptools = "*"
-pkg-config = "*"
 pytest = "*"
-mpi4py = "*"
-scikit-build-core = "*"
-cmake = "*"
-ninja = "*"
 pip = "*"
 pytorch-cpu = "*"
+patchelf = ">=0.17.2,<0.19"
 
 [target.linux-64.dependencies]
 nvshmem4py = "*"
 
 [pypi-dependencies]
 foehn = { path = ".", editable = true }
+build = ">=1.5.0, <2"
+twine = ">=6.2.0, <7"
+auditwheel = ">=6.6.0, <7"
 
 [package.build]
 backend = { name = "pixi-build-python", version = "*" }
@@ -46,3 +45,6 @@ setuptools = "*"
 build = "pip install --no-build-isolation -e ."
 test = "pytest tests -v"
 ci = { depends-on = ["build", "test"] }
+wheel = "python -m build"
+audit = "auditwheel repair dist/*.whl -w wheelhouse/"
+check-wheel = "twine check wheelhouse/* dist/*.tar.gz"
