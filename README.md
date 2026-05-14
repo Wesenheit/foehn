@@ -13,11 +13,15 @@ leverage software stack on modern HPC clusters.
 One of the most common ways to bootstrap massive distributed programs is to use Process Management Interface (exascale), PMIx for short. It was designed
 to launch massive MPI jobs accross enourmous HPC clusters, some achieving exascale performance.
 It is integrated with the SLURM job scheduler and can selected to be a default launching
-mechanism. Moreover, since the 5th version it is ABI compatible. Hence, it avoids various problems related to the MPI-based programs (for example, `mpi4py`
+mechanism. Moreover, the 5th version it is ABI compatible. Hence, it avoids various problems related to the MPI-based programs (for example, `mpi4py`
 needs to be compiled against specific MPI version). This makes this particular approach promising to achieve a platform-independent launching mechanism
 for PyTorch distributed jobs on modern HPC clusters.
 
-## Usage
+## Instalation
+In order to install one needs to specify the version of the library. Currently two versions are supported, `pytorch` and `nvshmem`.
+They can be installed with `foehn[pytorch]` or `foehn[nvshmem]` specifiers.
+
+## Usage (PyTorch)
 One can use `foehn` to start pytorch distributed job with one simple line
 ```python
 import foehn
@@ -26,7 +30,27 @@ foehn.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=
 Jobs can be launched with any PMIx 5.0-compatible plugin, starting with `prrte`, some MPI implementations (OpenMPI 5.0),
 native job launcher plugins to SLURM or Flux. Example:
 ```
- prterun -n 16 python3 -c "import foehn; foehn.pytorch.init_process_group(); import torch; print(torch.distributed.get_rank())"
+prterun -n 16 python3 -c "import foehn; foehn.pytorch.init_process_group(); import torch; print(torch.distributed.get_rank())"
+```
+Remember to manually finalize the backend!
+```
+torch.distributed.destroy_process_group()
+```
+
+## Usage (NVSHMEM)
+Nvshmem usage is very simillar to the `pytorch` usage, one needs to use a thin wrapper around the native `nvshmem` init.
+Example:
+```
+import foehn
+from cuda.core import Device
+
+store = foehn.PMIxStore(30) #manualy specify the PMIx backend with manual timeout, can become handy to set the device
+dev = Device(0) #first device or just set based on the use case
+foehn.nvshmem.init(dev, store) #device, store
+```
+Remember to manually finalize the backend!
+```
+nvshmem.finalize()
 ```
 
 
@@ -45,5 +69,5 @@ Alternativelly, one can use `pixi build` to compile a conda package.
 
 ## Roadmap
 
- - [ ] Support for NVSCHMEM (pytorch)
+ - [x] Support for NVSCHMEM (pytorch, cupy)
  - [ ] Support for JAX

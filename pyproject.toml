@@ -8,6 +8,7 @@ dependencies = []
 
 [project.optional-dependencies]
 pytorch = ["torch","numpy"]
+nvshmem = ["nvshmem4py","numpy"]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel", "pybind11"]

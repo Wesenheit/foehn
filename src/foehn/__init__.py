@@ -5,6 +5,12 @@ __all__ = [
     "PMIxStore",
 ]
 if importlib.util.find_spec("torch") is not None:
-    from .pytorch import PyTorchPMIxStore, init_process_group
+    from . import pytorch
 
-    __all__ += ["PyTorchPMIxStore", "init_process_group"]
+    __all__ += ["pytorch"]
+
+
+if importlib.util.find_spec("nvshmem") is not None:
+    from . import nvshmem
+
+    __all__ += ["nvshmem"]
