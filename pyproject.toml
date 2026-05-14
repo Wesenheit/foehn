@@ -1,14 +1,31 @@
 [project]
 name = "foehn"
-version = "0.1.0"
+version = "0.0.1"
 description = "PMIx bootstrap method for modern AI/ML applications"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
+license = {text = "MIT"}
+authors = [
+    {name = "Mateusz Kapusta", email = "mr.kapusta@student.uw.edu.pl"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Distributed Computing",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
+keywords = ["PMIx", "HPC", "distributed-computing", "machine-learning", "slurm"]
+
 [project.optional-dependencies]
-pytorch = ["torch","numpy"]
-nvshmem = ["nvshmem4py","numpy"]
+pytorch = ["torch>=2.0","numpy>=1.26"]
+nvshmem = ["nvshmem4py","numpy>=1.26"]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel", "pybind11"]

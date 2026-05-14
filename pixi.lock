@@ -548,13 +548,13 @@ packages:
   timestamp: 1767681372955
 - pypi: ./
   name: foehn
-  version: 0.1.0
-  sha256: 31c20c1b5d1b2cba3da5909fc9e6da1788a80faa230aae96cdd634a05969e223
+  version: 0.0.1
+  sha256: 2a8fca6e7a35e65e23848a539a2f46ef941a1d032e51700d82d5d77b192949ce
   requires_dist:
-  - torch ; extra == 'pytorch'
-  - numpy ; extra == 'pytorch'
+  - torch>=2.0 ; extra == 'pytorch'
+  - numpy>=1.26 ; extra == 'pytorch'
   - nvshmem4py ; extra == 'nvshmem'
-  - numpy ; extra == 'nvshmem'
+  - numpy>=1.26 ; extra == 'nvshmem'
   requires_python: '>=3.10'
 - conda: https://conda.anaconda.org/conda-forge/noarch/fsspec-2026.4.0-pyhd8ed1ab_0.conda
   sha256: 079701b4ff3b317a1a158cabd48cf2b856b8b8d3ef44f152809d9acf20cc8e10
