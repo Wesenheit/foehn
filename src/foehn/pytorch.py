@@ -4,7 +4,7 @@ import torch.distributed as dist
 from typing import overload
 
 
-class FoehnPMIxStore(dist.Store):
+class PyTorchPMIxStore(dist.Store):
     def __init__(self, timeout: int = 30):
         super().__init__()
         self._store = PMIxStore(timeout)
@@ -30,7 +30,7 @@ class FoehnPMIxStore(dist.Store):
 
 
 def init_process_group(*args, **kwargs):
-    store = FoehnPMIxStore()
+    store = PyTorchPMIxStore(**kwargs)
     rank = store._store.get_rank()
     world = store._store.get_world()
     dist.init_process_group(*args, **kwargs, store=store, rank=rank, world_size=world)

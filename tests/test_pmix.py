@@ -1,4 +1,3 @@
-import pytest
 from foehn.PMIx_core import PMIxStore
 import sys
 import os

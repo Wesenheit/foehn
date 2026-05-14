@@ -4,10 +4,13 @@ version = "0.1.0"
 description = "PMIx bootstrap method for modern AI/ML applications"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "torch",
-    "numpy"
-]
+dependencies = []
+
+[project.optional-dependencies]
+pytorch = ["torch","numpy"]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel", "pybind11"]
 build-backend = "setuptools.build_meta"
+
+
