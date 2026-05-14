@@ -204,11 +204,13 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   float total_sleep = 0; // total amount of time spend on sleeping
   PyPMIx *self_pmix = (PyPMIx *)self;
   PyObject *keys_list;
-  int _dummy_timeout;
-  if (!PyArg_ParseTuple(args, "O|i", &keys_list, &_dummy_timeout)) {
+  int timeout;
+  if (!PyArg_ParseTuple(args, "O|i", &keys_list, &timeout)) {
     return NULL;
   }
-
+  if (timeout < 0) {
+    timeout = self_pmix->timeout;
+  }
   if (!PyList_Check(keys_list)) {
     PyErr_SetString(PyExc_TypeError, "keys must be a list");
     return NULL;
@@ -223,7 +225,7 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   PMIX_INFO_CONSTRUCT(&info[1]);
   int wait_flag = 0;
   PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
-  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &self_pmix->timeout, PMIX_INT);
+  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &timeout, PMIX_INT);
   PMIX_PROC_CONSTRUCT(&proc);
   PMIX_PROC_LOAD(&proc, GlobState.proc.nspace, PMIX_RANK_UNDEF);
 
@@ -234,7 +236,7 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   int total_found = 0;
 
   while (total_found < n) {
-    if (total_sleep > self_pmix->timeout) {
+    if (total_sleep > timeout) {
       PyErr_SetString(PyExc_RuntimeError, "Timeout exceeded");
       goto err_cleanup;
     }

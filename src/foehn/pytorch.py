@@ -1,6 +1,7 @@
+from datetime import timedelta
 from foehn.PMIx_core import PMIxStore
-import sys
 import torch.distributed as dist
+from typing import overload
 
 
 class FoehnPMIxStore(dist.Store):
@@ -14,12 +15,18 @@ class FoehnPMIxStore(dist.Store):
     def get(self, key):
         return self._store.get(key)
 
-    def wait(self, keys, timeout):
-        timeout_seconds = int(timeout.total_seconds())
-        return self._store.wait(keys, timeout_seconds)
+    @overload
+    def wait(self, keys: list[str]) -> None: ...
 
-    def add(self, key, amount):
-        print(f"add {key} {amount}", file=sys.stderr)
+    @overload
+    def wait(self, keys: list[str], timeout: timedelta) -> None: ...
+
+    def wait(self, keys: list[str], timeout: timedelta | None) -> None:
+        if timeout is not None:
+            timeout_seconds = int(timeout.total_seconds())
+        else:
+            timeout_seconds = -1
+        return self._store.wait(keys, timeout_seconds)
 
 
 def init_process_group(*args, **kwargs):
