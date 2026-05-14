@@ -549,7 +549,7 @@ packages:
 - pypi: ./
   name: foehn
   version: 0.0.1
-  sha256: 2a8fca6e7a35e65e23848a539a2f46ef941a1d032e51700d82d5d77b192949ce
+  sha256: 4c733ffd412cc204aac97954a97c7689e8b7693ecaf3b0f092868898321c5a4f
   requires_dist:
   - torch>=2.0 ; extra == 'pytorch'
   - numpy>=1.26 ; extra == 'pytorch'
