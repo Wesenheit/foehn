@@ -103,18 +103,22 @@ static PyObject *set(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  pmix_value_t PMIX_value;
-  pmix_byte_object_t PMIX_bytes;
+  pmix_info_t info[1];
+  pmix_byte_object_t bo;
+
   char *val_copy = malloc(size_val);
   memcpy(val_copy, val, size_val);
-  PMIX_bytes.bytes = val_copy;
-  PMIX_bytes.size = size_val;
+  bo.bytes = val_copy;
+  bo.size = size_val;
 
-  PMIX_value.type = PMIX_BYTE_OBJECT;
-  PMIX_value.data.bo = PMIX_bytes;
-  pmix_status_t status = PMIx_Put(PMIX_GLOBAL, key, &PMIX_value);
-  PMIX_VALUE_DESTRUCT(&PMIX_value);
+  PMIX_INFO_CONSTRUCT(&info[0]);
+  strncpy(info[0].key, key, PMIX_MAX_KEYLEN);
+  info[0].value.type = PMIX_BYTE_OBJECT;
+  info[0].value.data.bo = bo;
 
+  pmix_status_t status = PMIx_Publish(info, 1);
+
+  PMIX_INFO_DESTRUCT(&info[0]);
   if (status != PMIX_SUCCESS) {
     PyErr_Format(PyExc_RuntimeError, "(set) failed to push key '%s': %s", key,
                  PMIx_Error_string(status));
@@ -145,57 +149,46 @@ static PyObject *get(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  pmix_value_t *return_val;
+  pmix_pdata_t pdata[1];
   pmix_info_t info[2];
+
   PMIX_INFO_CONSTRUCT(&info[0]);
   PMIX_INFO_CONSTRUCT(&info[1]);
-
-  int wait_flag = 0;
+  int wait_flag = 1; // NOTE: for Lookup, PMIX_WAIT=1 means "block until found"
   PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
   PMIx_Info_load(&info[1], PMIX_TIMEOUT, &self_pmix->timeout, PMIX_INT);
 
-  pmix_proc_t proc;
-  PMIX_PROC_CONSTRUCT(&proc);
-  PMIX_PROC_LOAD(&proc, GlobState.proc.nspace, PMIX_RANK_UNDEF);
+  PMIX_PDATA_CONSTRUCT(&pdata[0]);
+  strncpy(pdata[0].key, key, PMIX_MAX_KEYLEN);
 
-  pmix_status_t status = PMIx_Get(&proc, key, info, 2, &return_val);
-  PMIX_INFO_DESTRUCT(&info[0]);
-  PMIX_INFO_DESTRUCT(&info[1]);
-  PMIX_PROC_DESTRUCT(&proc);
+  pmix_status_t status = PMIx_Lookup(pdata, 1, info, 2);
 
   if (status == PMIX_ERR_TIMEOUT) {
     PyErr_Format(PyExc_TimeoutError, "(get) Timeout to get key '%s'!", key);
-    return NULL;
+    goto cleanup;
   }
   if (status != PMIX_SUCCESS) {
     PyErr_Format(PyExc_TypeError, "(get) Failed to get key '%s'!", key);
-    return NULL;
-  }
-  if (return_val == NULL) {
-    PyErr_SetString(PyExc_RuntimeError, "PMIx_Get returned NULL value");
-    return NULL;
+    goto cleanup;
   }
 
-  if (return_val->type != PMIX_BYTE_OBJECT) {
-    PyErr_SetString(PyExc_TypeError,
-                    "Posted something different than byte object!");
-    return NULL;
-  }
-
-  if (return_val->data.bo.bytes == NULL) {
-    PyErr_SetString(PyExc_RuntimeError, "PMIx_Get returned NULL bytes");
-    PMIX_VALUE_RELEASE(return_val);
-    return NULL;
+  pmix_byte_object_t *bo = &pdata[0].value.data.bo;
+  if (bo->bytes == NULL) {
+    PyErr_SetString(PyExc_RuntimeError, "PMIx_Lookup returned NULL bytes");
+    PMIX_PDATA_DESTRUCT(&pdata[0]);
+    goto cleanup;
   }
 
   PyObject *result;
-  // PyErr_Format(PyExc_RuntimeError, "%i", return_val->data.bo.size);
-  // return NULL;
-  result = PyBytes_FromStringAndSize(return_val->data.bo.bytes,
-                                     return_val->data.bo.size);
-
-  PMIX_VALUE_RELEASE(return_val);
+  result = PyBytes_FromStringAndSize(bo->bytes, bo->size);
+  PMIX_INFO_DESTRUCT(&info[0]);
+  PMIX_INFO_DESTRUCT(&info[1]);
+  PMIX_PDATA_DESTRUCT(&pdata[0]);
   return result;
+cleanup:
+  PMIX_INFO_DESTRUCT(&info[0]);
+  PMIX_INFO_DESTRUCT(&info[1]);
+  return NULL;
 }
 
 // 5. WATI
@@ -218,7 +211,6 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
 
   Py_ssize_t n = PyList_Size(keys_list);
 
-  pmix_proc_t proc;
   pmix_info_t info[2];
 
   PMIX_INFO_CONSTRUCT(&info[0]);
@@ -226,9 +218,6 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   int wait_flag = 0;
   PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
   PMIx_Info_load(&info[1], PMIX_TIMEOUT, &timeout, PMIX_INT);
-  PMIX_PROC_CONSTRUCT(&proc);
-  PMIX_PROC_LOAD(&proc, GlobState.proc.nspace, PMIX_RANK_UNDEF);
-
   bool found[n];
   for (Py_ssize_t i = 0; i < n; i++) {
     found[i] = 0;
@@ -254,8 +243,10 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
         goto err_cleanup;
       }
 
-      pmix_value_t *val;
-      pmix_status_t rc = PMIx_Get(&proc, key, info, 2, &val);
+      pmix_pdata_t pdata[1];
+      PMIX_PDATA_CONSTRUCT(&pdata[0]);
+      strncpy(pdata[0].key, key, PMIX_MAX_KEYLEN);
+      pmix_status_t rc = PMIx_Lookup(pdata, 1, info, 2);
 
       if (rc == PMIX_ERR_TIMEOUT) {
         PyErr_Format(PyExc_TimeoutError,
@@ -269,7 +260,7 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
       }
       found[i] = 1;
       total_found += 1;
-      PMIX_VALUE_RELEASE(val);
+      PMIX_PDATA_DESTRUCT(&pdata[0]);
     }
     total_sleep += delta_T;
     usleep(delta_T * 1000);
@@ -277,14 +268,12 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
 
   PMIX_INFO_DESTRUCT(&info[0]);
   PMIX_INFO_DESTRUCT(&info[1]);
-  PMIX_PROC_DESTRUCT(&proc);
   Py_INCREF(Py_None);
   return Py_None;
 
 err_cleanup: {
   PMIX_INFO_DESTRUCT(&info[0]);
   PMIX_INFO_DESTRUCT(&info[1]);
-  PMIX_PROC_DESTRUCT(&proc);
   return NULL;
 }
 }
