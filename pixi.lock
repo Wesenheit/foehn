@@ -546,16 +546,6 @@ packages:
   purls: []
   size: 180970
   timestamp: 1767681372955
-- pypi: ./
-  name: foehn
-  version: 0.0.1
-  sha256: 993413b4326594011ab6ff1deb653808951b7bd43b2df129f2126755a2ef5689
-  requires_dist:
-  - torch>=2.0 ; extra == 'pytorch'
-  - numpy>=1.26 ; extra == 'pytorch'
-  - nvshmem4py ; extra == 'nvshmem'
-  - numpy>=1.26 ; extra == 'nvshmem'
-  requires_python: '>=3.10'
 - conda: https://conda.anaconda.org/conda-forge/noarch/fsspec-2026.4.0-pyhd8ed1ab_0.conda
   sha256: 079701b4ff3b317a1a158cabd48cf2b856b8b8d3ef44f152809d9acf20cc8e10
   md5: 2c11aa96ea85ced419de710c1c3a78ff
@@ -2467,6 +2457,16 @@ packages:
   - markdown-it-py>=2.2.0
   - pygments>=2.13.0,<3.0.0
   requires_python: '>=3.9.0'
+- pypi: ./
+  name: rixa
+  version: 0.0.1
+  sha256: 56a396625884e845e65157ac3e58ffe405010231a4d1f3912b1913b335d2f043
+  requires_dist:
+  - torch>=2.0 ; extra == 'pytorch'
+  - numpy>=1.26 ; extra == 'pytorch'
+  - nvshmem4py ; extra == 'nvshmem'
+  - numpy>=1.26 ; extra == 'nvshmem'
+  requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/b7/46/f5af3402b579fd5e11573ce652019a67074317e18c1935cc0b4ba9b35552/secretstorage-3.5.0-py3-none-any.whl
   name: secretstorage
   version: 3.5.0

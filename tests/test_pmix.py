@@ -1,11 +1,11 @@
-from foehn.PMIx_core import PMIxStore
+from rixa.PMIx_core import PMIxStore
 import sys
 import os
 import subprocess
 
 
 def is_worker():
-    return os.environ.get("FOEHN_WORKER_MODE") == "1"
+    return os.environ.get("RIXA_WORKER_MODE") == "1"
 
 
 if is_worker():
@@ -21,14 +21,14 @@ if is_worker():
 
 def test_pmix_rank_validity(nprocs):
     env = os.environ.copy()
-    env["FOEHN_WORKER_MODE"] = "1"
+    env["RIXA_WORKER_MODE"] = "1"
 
     cmd = [
         "mpirun",
         "-n",
         nprocs,
         "-x",
-        "FOEHN_WORKER_MODE",
+        "RIXA_WORKER_MODE",
         "-x",
         "PYTHONPATH",
         sys.executable,

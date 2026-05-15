@@ -2,12 +2,12 @@ import os
 import sys
 import subprocess
 import pytest
-import foehn.nvshmem
+import rixa.nvshmem
 import nvshmem.core as nvshmem
 
 from cuda.core import Device
 
-WORKER_ENV_VAR = "FOEHN_NVSHMEM_WORKER"
+WORKER_ENV_VAR = "RIXA_NVSHMEM_WORKER"
 
 
 def is_worker():
@@ -16,9 +16,9 @@ def is_worker():
 
 if is_worker():
     try:
-        store = foehn.PMIxStore(30)
+        store = rixa.PMIxStore(30)
         dev = Device(0)
-        foehn.nvshmem.init(dev, store, 30)
+        rixa.nvshmem.init(dev, store, 30)
 
         is_init = nvshmem.init_status()
         if is_init:

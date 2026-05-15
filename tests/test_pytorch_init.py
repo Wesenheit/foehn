@@ -3,9 +3,9 @@ import sys
 import subprocess
 import pytest
 import torch
-import foehn
+import rixa
 
-WORKER_ENV_VAR = "FOEHN_PYTORCH_WORKER"
+WORKER_ENV_VAR = "RIXA_PYTORCH_WORKER"
 
 
 def is_worker():
@@ -14,7 +14,7 @@ def is_worker():
 
 if is_worker():
     try:
-        foehn.pytorch.init_process_group()
+        rixa.pytorch.init_process_group()
 
         is_init = torch.distributed.is_initialized()
 

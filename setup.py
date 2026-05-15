@@ -2,7 +2,7 @@ from setuptools import setup, Extension
 
 ext_modules = [
     Extension(
-        "foehn.PMIx_core",
+        "rixa.PMIx_core",
         sources=[
             "src/bindings/core.c",
         ],

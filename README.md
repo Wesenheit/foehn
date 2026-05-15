@@ -1,13 +1,13 @@
-# Foehn
+# Rixa
 
-Foehn is a high-performance library that provides a unified and efficient way to bootstrap distributed PyTorch jobs.
+Rixa (Runtime Initialization by pmiX Adoption) is a high-performance library that provides a unified and efficient way to bootstrap distributed PyTorch jobs.
 It leverages PMIx 5.0 to seamlessly launch PyTorch workloads on large-scale HPC clusters, eliminating the need to manually specify the master IP address and port.
 
 
-## Why Foehn?
+## Why Rixa?
 Standard PyTorch bootstrapping (TCP/File-store) is built for cloud portability but often
 struggles with scale and reliability on bare-metal HPC clusters.
-`foehn` bypasses these overheads by using PMIx as a native high-performance key-value store, providing
+`rixa` bypasses these overheads by using PMIx as a native high-performance key-value store, providing
 
 1. Zero-config Launching: No master IP/Port orchestration required.
 
@@ -20,22 +20,22 @@ In order to install one needs to specify the version of the library. Currently t
 They can be easily installed with
 ```bash
 # Install for PyTorch support
-pip install "foehn[pytorch]"
+pip install "rixa[pytorch]"
 
 # Install for NVSHMEM support
-pip install "foehn[nvshmem]"
+pip install "rixa[nvshmem]"
 ```
 
 ## Usage (PyTorch)
-One can use `foehn` to start pytorch distributed job with one simple line
+One can use `rixa` to start pytorch distributed job with one simple line
 ```python
-import foehn
-foehn.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=pytorch_parameter)
+import rixa
+rixa.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=pytorch_parameter)
 ```
 Jobs can be launched with any PMIx 5.0-compatible plugin, starting with `prrte`, some MPI implementations (OpenMPI 5.0),
 native job launcher plugins to SLURM or Flux. Example:
 ```bash
-prterun -n 16 python3 -c "import foehn; foehn.pytorch.init_process_group(); import torch; print(torch.distributed.get_rank())"
+prterun -n 16 python3 -c "import rixa; rixa.pytorch.init_process_group(); import torch; print(torch.distributed.get_rank())"
 ```
 Remember to manually finalize the backend!
 ```python
@@ -46,12 +46,12 @@ torch.distributed.destroy_process_group()
 Nvshmem usage is very simillar to the `pytorch` usage, one needs to use a thin wrapper around the native `nvshmem` init.
 Example:
 ```python
-import foehn
+import rixa
 from cuda.core import Device
 
-store = foehn.PMIxStore(30) #manualy specify the PMIx backend with manual timeout, can become handy to set the device
+store = rixa.PMIxStore(30) #manualy specify the PMIx backend with manual timeout, can become handy to set the device
 dev = Device(0) #first device or just set based on the use case
-foehn.nvshmem.init(dev, store) #device, store
+rixa.nvshmem.init(dev, store) #device, store
 ```
 Remember to manually finalize the backend!
 ```python

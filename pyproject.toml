@@ -1,5 +1,5 @@
 [project]
-name = "foehn"
+name = "rixa"
 version = "0.0.1"
 description = "PMIx bootstrap method for modern AI/ML applications"
 readme = "README.md"
@@ -17,7 +17,6 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: System :: Distributed Computing",
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
 ]
 

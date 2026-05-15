@@ -1,5 +1,5 @@
 from datetime import timedelta
-from foehn.PMIx_core import PMIxStore
+from rixa.PMIx_core import PMIxStore
 import torch.distributed as dist
 from typing import overload
 

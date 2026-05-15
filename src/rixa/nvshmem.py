@@ -1,7 +1,7 @@
 from cuda.core import Device
 import nvshmem.core as nvshmem
 import numpy as np
-from foehn.PMIx_core import PMIxStore
+from rixa.PMIx_core import PMIxStore
 
 
 def init(dev: Device, store: PMIxStore, timeout: int = 30) -> None:
