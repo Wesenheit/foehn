@@ -48,8 +48,9 @@ ci = { depends-on = ["build", "test"] }
 
 #publishing and building
 wheel = "python -m build --wheel"
+sdist = "python -m build --sdist"
 audit = "auditwheel repair dist/*.whl -w wheelhouse/"
 check-wheel = "twine check wheelhouse/* dist/*"
-pre-publish = { depends-on = ["wheel","audit","check-wheel"]}
+pre-publish = { depends-on = ["wheel","sdist", "audit","check-wheel"]}
 clean = "rm -rf dist/ wheelhouse/ build/"
 publish-test = "twine upload --repository testpypi wheelhouse/*"
