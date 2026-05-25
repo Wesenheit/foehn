@@ -18,7 +18,7 @@ jobs:
         run: pip install sphinx sphinx-rtd-theme myst-parser
 
       - name: Install rixa
-        run: pip install -e .
+        run: pip install rixa
 
       - name: Build docs
         run: sphinx-build docs docs/_build/html
