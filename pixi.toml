@@ -64,10 +64,10 @@ pre-publish = { depends-on = ["clean", "build-wheelhouse", "sdist","check-wheel"
 
 ## PUBLISH
 publish-test = "twine upload --repository testpypi wheelhouse/*"
-publish = "twine upload --repository wheelhouse/*"
+publish = "twine upload --repository pypi wheelhouse/*"
 
 publish-source-test = "twine upload --repository testpypi dist/*"
-publish-source = "twine upload --repository dist/*"
+publish-source = "twine upload --repository pypi dist/*"
 
 full-publish-test = {depends-on = ["publish-test", "publish-source-test"]}
 full-publish = {depends-on = ["publish", "publish-source"]}
