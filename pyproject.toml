@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
-license = {text = "MIT"}
 authors = [
     {name = "Mateusz Kapusta", email = "mr.kapusta@student.uw.edu.pl"}
 ]

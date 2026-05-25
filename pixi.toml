@@ -13,11 +13,12 @@ version = "0.0.1"
 python = ">=3.10"
 openmpi = ">=5.0"
 libpmix-devel = ">=5.0"
-setuptools = "*"
-pytest = "*"
-pip = "*"
-pytorch-cpu = "*"
 patchelf = ">=0.17.2,<0.19"
+cibuildwheel = ">=3.4.1,<4"
+pytest = ">=9.0.3,<10"
+pytorch-cpu = ">=2.10.0,<3"
+pip = ">=26.1.1,<27"
+setuptools = ">=82.0.1,<83"
 
 [target.linux-64.dependencies]
 nvshmem4py = "*"
@@ -46,11 +47,27 @@ build = "pip install --no-build-isolation -e ."
 test = "pytest tests -v"
 ci = { depends-on = ["build", "test"] }
 
-#publishing and building
-wheel = "python -m build --wheel"
-sdist = "python -m build --sdist"
-audit = "auditwheel repair dist/*.whl -w wheelhouse/"
-check-wheel = "twine check wheelhouse/* dist/*"
-pre-publish = { depends-on = ["wheel","sdist", "audit","check-wheel"]}
+## CLEAN AND TEST OBJECTS
 clean = "rm -rf dist/ wheelhouse/ build/"
+check-wheel = "twine check wheelhouse/* "
+check-dist = "twine check dist/* "
+sdist= "python -m build --sdist"
+
+### TESTING BUILD
+wheel-test = "python -m build --wheel"
+audit-test = "auditwheel repair dist/*.whl -w wheelhouse/"
+pre-publish-test = { depends-on = ["clean","wheel-test","sdist", "audit-test","check-wheel","check-dist"]}
+
+## PRODUCTION BUILD
+build-wheelhouse = "cibuildwheel --config-file cibuildwheel.toml"
+pre-publish = { depends-on = ["clean", "build-wheelhouse", "sdist","check-wheel","check-dist"]}
+
+## PUBLISH
 publish-test = "twine upload --repository testpypi wheelhouse/*"
+publish = "twine upload --repository wheelhouse/*"
+
+publish-source-test = "twine upload --repository testpypi dist/*"
+publish-source = "twine upload --repository dist/*"
+
+full-publish-test = {depends-on = ["publish-test", "publish-source-test"]}
+full-publish = {depends-on = ["publish", "publish-source"]}

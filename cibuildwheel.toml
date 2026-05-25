@@ -1,0 +1,8 @@
+[tool.cibuildwheel]
+build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
+before-all = "bash {project}/scripts/build_pmix.sh 2>&1 | tee /tmp/pmix-build.log && echo 'BUILD DONE' && ls /tmp/pmix/lib/ || echo 'BUILD FAILED'"
+build-frontend = "build"
+
+[tool.cibuildwheel.linux]
+environment = { PMIX_PREFIX = "/tmp/pmix", PKG_CONFIG_PATH = "/tmp/pmix/lib/pkgconfig", LD_LIBRARY_PATH = "/tmp/pmix/lib", LIBRARY_PATH = "/tmp/pmix/lib", C_INCLUDE_PATH = "/tmp/pmix/include", CFLAGS = "-I/tmp/pmix/include", LDFLAGS = "-L/tmp/pmix/lib -Wl,-rpath,/tmp/pmix/lib" }
+repair-wheel-command = "LD_LIBRARY_PATH=/tmp/pmix/lib auditwheel repair -w {dest_dir} {wheel}"
