@@ -3548,7 +3548,7 @@ packages:
 - pypi: ./
   name: rixa
   version: 0.0.1
-  sha256: 77ce30d4284a5b4629682655de6076c82c1d42ba09125183c573354e1d4198c3
+  sha256: b54d73eb40ae76b7352011c5e91000167295ea6c018d2e24650aa025bab50978
   requires_dist:
   - torch>=2.0 ; extra == 'pytorch'
   - numpy>=1.26 ; extra == 'pytorch'

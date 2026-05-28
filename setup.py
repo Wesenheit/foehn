@@ -3,9 +3,7 @@ from setuptools import setup, Extension
 ext_modules = [
     Extension(
         "rixa.PMIx_core",
-        sources=[
-            "src/bindings/core.c",
-        ],
+        sources=["src/bindings/core.c", "src/bindings/rixa_pmix_store.c"],
         include_dirs=[
             "include",
         ],

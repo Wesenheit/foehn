@@ -4,15 +4,14 @@
 #include <structmember.h>
 #include <unistd.h>
 
-static struct {
-  pmix_proc_t proc;
-  int init;
-} GlobState;
+#include "pyerrors.h"
+#include "rixa_pmix_store.h"
 
 typedef struct {
   PyObject_HEAD;
-  int timeout;
+  rixa_store store;
 } PyPMIx;
+static GlobalPMIxState state;
 
 Py_ssize_t get_string_from_python(PyObject *val_obj, const char **out) {
   Py_ssize_t return_val;
@@ -29,23 +28,23 @@ Py_ssize_t get_string_from_python(PyObject *val_obj, const char **out) {
 
 static int PMIxObjInit(PyObject *self, PyObject *args) {
   PyPMIx *self_pmix = (PyPMIx *)self;
-  if (!PyArg_ParseTuple(args, "i", &self_pmix->timeout)) {
+  if (!PyArg_ParseTuple(args, "i", &self_pmix->store.timeout)) {
     return -1;
   }
   // self_pmix->timeout = 30;
 
-  if (GlobState.init) {
+  if (state.init) {
     PyErr_SetString(PyExc_TypeError, "PMIx already started!");
     return -1;
   }
 
-  pmix_status_t rc = PMIx_Init(&GlobState.proc, NULL, 0);
+  pmix_status_t rc = PMIx_Init(&state.proc, NULL, 0);
   if (rc != PMIX_SUCCESS) {
     PyErr_SetString(PyExc_TypeError, "Failed to init PMIx!");
     return -1;
   }
 
-  GlobState.init = 1;
+  state.init = 1;
   return 0;
 }
 
@@ -61,27 +60,30 @@ static PyTypeObject PMIxType = {
 // IMPLEMENTATIONS
 
 // 1. GET RANK
-static PyObject *get_rank(PyObject *self, PyObject *Py_UNUSED(ignored)) {
-  int rank = GlobState.proc.rank;
+static PyObject *get_rank_python(PyObject *self, PyObject *Py_UNUSED(ignored)) {
+  int rank = rixa_get_rank(&state);
+  if (rank < 0) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    "Pmix runtime not started, failed to query rank!");
+    return NULL;
+  }
+
   PyObject *result = PyLong_FromLong((long)rank);
   return result;
 }
 
 // 2. GET WORLD
-static PyObject *get_world(PyObject *self, PyObject *Py_UNUSED(ignored)) {
-  pmix_value_t *val = NULL;
-  pmix_proc_t job_info;
-  PMIX_LOAD_NSPACE(job_info.nspace, GlobState.proc.nspace);
-  job_info.rank = PMIX_RANK_WILDCARD;
+static PyObject *get_world_python(PyObject *self,
+                                  PyObject *Py_UNUSED(ignored)) {
 
-  pmix_status_t rc = PMIx_Get(&job_info, PMIX_JOB_SIZE, NULL, 0, &val);
-
-  uint32_t world_size = -1;
-  if (PMIX_SUCCESS == rc && val != NULL) {
-    world_size = val->data.uint32;
-    PMIX_VALUE_RELEASE(val);
+  int world = rixa_get_world(&state);
+  if (world < 0) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    "Pmix runtime not started, failed to query world!");
+    return NULL;
   }
-  PyObject *result = PyLong_FromLong((long)world_size);
+
+  PyObject *result = PyLong_FromLong((long)world);
   return result;
 }
 
@@ -103,30 +105,9 @@ static PyObject *set(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  pmix_info_t info[1];
-  pmix_byte_object_t bo;
-
-  char *val_copy = malloc(size_val);
-  memcpy(val_copy, val, size_val);
-  bo.bytes = val_copy;
-  bo.size = size_val;
-
-  PMIX_INFO_CONSTRUCT(&info[0]);
-  strncpy(info[0].key, key, PMIX_MAX_KEYLEN);
-  info[0].value.type = PMIX_BYTE_OBJECT;
-  info[0].value.data.bo = bo;
-
-  pmix_status_t status = PMIx_Publish(info, 1);
-
-  PMIX_INFO_DESTRUCT(&info[0]);
-  if (status != PMIX_SUCCESS) {
+  Rixa_Error status = rixa_set(&state, NULL, key, val, size_val);
+  if (status != RIXA_SUCCESS) {
     PyErr_Format(PyExc_RuntimeError, "(set) failed to push key '%s': %s", key,
-                 PMIx_Error_string(status));
-    return NULL;
-  }
-  status = PMIx_Commit();
-  if (status != PMIX_SUCCESS) {
-    PyErr_Format(PyExc_RuntimeError, "(set) failed to commit key '%s': %s", key,
                  PMIx_Error_string(status));
     return NULL;
   }
@@ -149,46 +130,21 @@ static PyObject *get(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  pmix_pdata_t pdata[1];
-  pmix_info_t info[2];
+  Rixa_bytes out;
+  Rixa_Error status = rixa_get(&state, &self_pmix->store, key, &out);
 
-  PMIX_INFO_CONSTRUCT(&info[0]);
-  PMIX_INFO_CONSTRUCT(&info[1]);
-  int wait_flag = 1; // NOTE: for Lookup, PMIX_WAIT=1 means "block until found"
-  PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
-  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &self_pmix->timeout, PMIX_INT);
-
-  PMIX_PDATA_CONSTRUCT(&pdata[0]);
-  strncpy(pdata[0].key, key, PMIX_MAX_KEYLEN);
-
-  pmix_status_t status = PMIx_Lookup(pdata, 1, info, 2);
-
-  if (status == PMIX_ERR_TIMEOUT) {
+  if (status == RIXA_TIMEOUT) {
     PyErr_Format(PyExc_TimeoutError, "(get) Timeout to get key '%s'!", key);
-    goto cleanup;
+    return NULL;
   }
-  if (status != PMIX_SUCCESS) {
+  if (status != RIXA_SUCCESS) {
     PyErr_Format(PyExc_TypeError, "(get) Failed to get key '%s'!", key);
-    goto cleanup;
-  }
-
-  pmix_byte_object_t *bo = &pdata[0].value.data.bo;
-  if (bo->bytes == NULL) {
-    PyErr_SetString(PyExc_RuntimeError, "PMIx_Lookup returned NULL bytes");
-    PMIX_PDATA_DESTRUCT(&pdata[0]);
-    goto cleanup;
+    return NULL;
   }
 
   PyObject *result;
-  result = PyBytes_FromStringAndSize(bo->bytes, bo->size);
-  PMIX_INFO_DESTRUCT(&info[0]);
-  PMIX_INFO_DESTRUCT(&info[1]);
-  PMIX_PDATA_DESTRUCT(&pdata[0]);
+  result = PyBytes_FromStringAndSize(out.bytes, out.size);
   return result;
-cleanup:
-  PMIX_INFO_DESTRUCT(&info[0]);
-  PMIX_INFO_DESTRUCT(&info[1]);
-  return NULL;
 }
 
 // 5. WATI
@@ -202,7 +158,7 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
     return NULL;
   }
   if (timeout < 0) {
-    timeout = self_pmix->timeout;
+    timeout = self_pmix->store.timeout;
   }
   if (!PyList_Check(keys_list)) {
     PyErr_SetString(PyExc_TypeError, "keys must be a list");
@@ -280,14 +236,14 @@ err_cleanup: {
 
 // -1. CLEAN UP
 void PMIxCleanup(void) {
-  if (GlobState.init == 1) {
+  if (state.init == 1) {
     PMIx_Finalize(NULL, 0);
   }
 }
 
 static PyMethodDef Custom_methods[] = {
-    {"get_rank", get_rank, METH_NOARGS, "Get the process rank"},
-    {"get_world", get_world, METH_NOARGS, "Get the world size"},
+    {"get_rank", get_rank_python, METH_NOARGS, "Get the process rank"},
+    {"get_world", get_world_python, METH_NOARGS, "Get the world size"},
     {"set", set, METH_VARARGS, "set a key-value pair"},
     {"get", get, METH_VARARGS, "get a value for given key"},
     {"wait", wait_for_keys, METH_VARARGS, "wait for arrays of keys"},
@@ -317,6 +273,6 @@ PyMODINIT_FUNC PyInit_PMIx_core(void) {
 
   Py_AtExit(PMIxCleanup);
 
-  GlobState.init = 0; // set that we can init PMIX
+  state.init = 0; // set that we can init PMIX
   return m;
 }
