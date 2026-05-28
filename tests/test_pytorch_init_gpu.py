@@ -14,12 +14,12 @@ def is_worker():
 
 if is_worker():
     try:
-        rixa.pytorch.init_process_group("gloo")
+        rixa.pytorch.init_process_group("nccl")
 
         is_init = torch.distributed.is_initialized()
 
         if is_init:
-            a = torch.tensor(1.0)
+            a = torch.tensor(1.0, device="cuda")
             torch.distributed.all_reduce(a)
             torch.distributed.destroy_process_group()
             print("PYTORCH_WORKER_CLEAN_EXIT")
@@ -46,7 +46,7 @@ def test_pytorch_init_isolated(nprocs):
         __file__,
     ]
 
-    result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    result = subprocess.run(cmd, capture_output=False, text=True, env=env)
 
     assert result.returncode == 0, f"Subprocess failed with stderr: {result.stderr}"
     assert result.stdout.count("PYTORCH_WORKER_CLEAN_EXIT") == int(nprocs)

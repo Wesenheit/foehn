@@ -5,7 +5,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--nprocs",
         action="store",
-        default="2",
+        default="10",
         help="Number of MPI processes to spawn for isolated tests",
     )
 
