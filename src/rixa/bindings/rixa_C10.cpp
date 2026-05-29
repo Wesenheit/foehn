@@ -1,7 +1,6 @@
 #include <chrono>
 #include <cstdint>
 #include <pmix.h>
-#include <pmix_common.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // for std::vector, std::string conversions
 #include <stdexcept>
@@ -41,6 +40,9 @@ public:
       PMIx_Finalize(NULL, 0);
       state.init = 0;
     };
+  }
+  c10::intrusive_ptr<c10d::Store> clone() override {
+    throw std::runtime_error("PMIxC10dStore does not support clone()");
   }
 
   // ----- required overrides -----

@@ -1,6 +1,6 @@
 [project]
 name = "rixa"
-version = "0.0.1"
+version = "0.0.2.dev2"
 description = "PMIx bootstrap method for modern AI/ML applications"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,10 +22,14 @@ classifiers = [
 keywords = ["PMIx", "HPC", "distributed-computing", "machine-learning", "slurm"]
 
 [project.optional-dependencies]
-pytorch = ["torch>=2.0","numpy>=1.26"]
+pytorch = ["torch>=2.7.0","numpy>=1.26"]
 nvshmem = ["nvshmem4py","numpy>=1.26"]
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "pybind11"]
+requires = [
+    "setuptools>=61.0",
+     "wheel",
+    "pybind11",
+]
 build-backend = "setuptools.build_meta"
 

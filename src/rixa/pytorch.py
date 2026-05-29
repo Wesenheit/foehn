@@ -2,7 +2,51 @@ from datetime import timedelta
 import torch.distributed as dist
 from rixa.PMIx_core import PMIxStore
 from typing import overload
-from rixa._rixa_torch import PMIxC10dStore
+import os
+import importlib.util
+
+_ext = None
+
+
+def _get_ext():
+    global _ext
+    if _ext is not None:
+        return _ext  # already loaded this process
+
+    if importlib.util.find_spec("rixa._rixa_torch"):
+        import rixa._rixa_torch as m
+
+        _ext = m
+        return _ext
+
+    try:
+        import torch.utils.cpp_extension as cpp_ext
+    except ImportError:
+        raise RuntimeError(
+            "PyTorch is required for this feature.\n"
+            "Install it with: pip install rixa[torch]"
+        )
+
+    src_dir = os.path.join(os.path.dirname(__file__), "bindings")
+
+    _ext = cpp_ext.load(
+        name="_rixa_torch",  # no dots in JIT name
+        sources=[
+            os.path.join(src_dir, "rixa_pmix_store.c"),
+            os.path.join(src_dir, "rixa_C10.cpp"),
+        ],
+        extra_cflags=["-O3"],
+        extra_ldflags=["-lpmix"],
+        extra_include_paths=[
+            src_dir,
+        ],
+        verbose=False,
+    )
+    return _ext
+
+
+def get_pmix_store():
+    return _get_ext().PMIxC10dStore
 
 
 class PyTorchPMIxStore(dist.Store):
@@ -31,7 +75,9 @@ class PyTorchPMIxStore(dist.Store):
 
 
 def init_process_group(backend, *args, **kwargs):
-    store = PMIxC10dStore()
+    store = get_pmix_store()()
     rank = store.rank()
     world = store.world_size()
-    dist.init_process_group(*args, **kwargs, store=store, rank=rank, world_size=world)
+    dist.init_process_group(
+        backend, *args, **kwargs, store=store, rank=rank, world_size=world
+    )

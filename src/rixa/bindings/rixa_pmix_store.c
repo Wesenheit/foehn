@@ -1,6 +1,10 @@
 #include "rixa_pmix_store.h"
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int rixa_get_rank(GlobalPMIxState *GlobState) {
   if (GlobState->init) {
     return GlobState->proc.rank;
@@ -34,7 +38,7 @@ Rixa_Error rixa_set(GlobalPMIxState *state, rixa_store *store, const char *key,
   pmix_info_t info[1];
   pmix_byte_object_t bo;
 
-  char *val_copy = malloc(val_len * sizeof(char));
+  char *val_copy = (char *)malloc(val_len * sizeof(char));
   memcpy(val_copy, val, val_len);
   bo.bytes = val_copy;
   bo.size = val_len;
@@ -93,7 +97,7 @@ Rixa_Error rixa_get(GlobalPMIxState *state, rixa_store *store, const char *key,
     return RIXA_OTHER_ERROR;
   }
   out->size = bo->size;
-  out->bytes = malloc(sizeof(char) * out->size);
+  out->bytes = (char *)malloc(sizeof(char) * out->size);
   memcpy(out->bytes, bo->bytes, out->size);
 
   PMIX_INFO_DESTRUCT(&info[0]);
@@ -160,3 +164,7 @@ Rixa_Error rixa_wait(GlobalPMIxState *state, rixa_store *store,
   PMIX_INFO_DESTRUCT(&info[1]);
   return RIXA_SUCCESS;
 }
+
+#ifdef __cplusplus
+}
+#endif

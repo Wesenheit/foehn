@@ -14,8 +14,6 @@ def is_worker():
 
 if is_worker():
     try:
-        torch.cuda.set_device(0)
-        os.environ["NCCL_ALLOW_SHARE_GPU"] = "1"
         rixa.pytorch.init_process_group("nccl")
 
         is_init = torch.distributed.is_initialized()

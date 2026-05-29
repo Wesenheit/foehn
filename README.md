@@ -58,7 +58,7 @@ Remember to manually finalize the backend!
 nvshmem.finalize()
 ```
 
-## Installation
+## Development
 Library can be compiled from source with standard `setuptools` and requires PMIx library supporting version >5.0.
 Development of the package is managed with `pixi` that can be used to also bring all necessary libraries for testing and development.
 It can be locally tested using `prrte` and more recently with OpenMPI provided by `pixi`.
