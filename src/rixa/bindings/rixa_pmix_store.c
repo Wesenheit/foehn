@@ -12,6 +12,21 @@ int rixa_get_rank(GlobalPMIxState *GlobState) {
     return -1;
 }
 
+int rixa_get_local_rank(GlobalPMIxState *state) {
+  if (!state->init) {
+    return -1;
+  }
+  pmix_value_t *val = NULL;
+  pmix_status_t status = PMIx_Get(&state->proc, PMIX_LOCAL_RANK, NULL, 0, &val);
+
+  uint16_t rc = -1;
+  if (PMIX_SUCCESS == status && val != NULL) {
+    rc = val->data.uint16;
+  }
+  PMIX_VALUE_RELEASE(val);
+  return rc;
+}
+
 int rixa_get_world(GlobalPMIxState *GlobState) {
 
   if (!GlobState->init) {
@@ -27,8 +42,8 @@ int rixa_get_world(GlobalPMIxState *GlobState) {
   uint32_t world_size = -1;
   if (PMIX_SUCCESS == rc && val != NULL) {
     world_size = val->data.uint32;
-    PMIX_VALUE_RELEASE(val);
   }
+  PMIX_VALUE_RELEASE(val);
   return world_size;
 }
 

@@ -145,6 +145,7 @@ public:
   int rank() { return rixa_get_rank(&state); }
 
   int world_size() { return rixa_get_world(&state); }
+  int local_rank() { return rixa_get_local_rank(&state); }
 };
 
 PYBIND11_MODULE(_rixa_torch, m) {
@@ -154,6 +155,7 @@ PYBIND11_MODULE(_rixa_torch, m) {
       m, "PMIxC10dStore")
       .def(py::init<>())
       .def("rank", &PMIxC10dStore::rank)
+      .def("local_rank", &PMIxC10dStore::local_rank)
       .def("world_size", &PMIxC10dStore::world_size)
       .def("finalize", &PMIxC10dStore::finalize)
       .def("init", &PMIxC10dStore::init);

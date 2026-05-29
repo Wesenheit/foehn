@@ -45,6 +45,7 @@ typedef struct {
 
 int rixa_get_rank(GlobalPMIxState *state);
 int rixa_get_world(GlobalPMIxState *state);
+int rixa_get_local_rank(GlobalPMIxState *state);
 
 Rixa_Error rixa_set(GlobalPMIxState *state, rixa_store *store, const char *key,
                     const char *val, uint32_t val_len);

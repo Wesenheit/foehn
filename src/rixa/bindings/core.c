@@ -75,6 +75,18 @@ static PyObject *get_rank_python(PyObject *self, PyObject *Py_UNUSED(ignored)) {
   return result;
 }
 
+static PyObject *get_local_rank_python(PyObject *self,
+                                       PyObject *Py_UNUSED(ignored)) {
+  int rank = rixa_get_local_rank(&state);
+  if (rank < 0) {
+    PyErr_SetString(PyExc_RuntimeError,
+                    "Pmix runtime not started, failed to query rank!");
+    return NULL;
+  }
+
+  PyObject *result = PyLong_FromLong((long)rank);
+  return result;
+}
 // 2. GET WORLD
 static PyObject *get_world_python(PyObject *self,
                                   PyObject *Py_UNUSED(ignored)) {
@@ -206,6 +218,8 @@ void PMIxCleanup(void) {
 static PyMethodDef Custom_methods[] = {
     {"get_rank", get_rank_python, METH_NOARGS, "Get the process rank"},
     {"get_world", get_world_python, METH_NOARGS, "Get the world size"},
+    {"get_local_rank", get_local_rank_python, METH_NOARGS,
+     "Get the local process rank"},
     {"set", set, METH_VARARGS, "set a key-value pair"},
     {"get", get, METH_VARARGS, "get a value for given key"},
     {"wait", wait_for_keys, METH_VARARGS, "wait for arrays of keys"},

@@ -11,6 +11,7 @@ def is_worker():
 if is_worker():
     store = PMIxStore(30)
     rank = store.get_rank()
+    local_rank = store.get_local_rank()
     world = store.get_world()
 
     assert rank >= 0

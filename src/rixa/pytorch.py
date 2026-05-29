@@ -6,6 +6,7 @@ import os
 import importlib.util
 from pathlib import Path
 import ctypes
+import torch
 
 _ext = None
 
@@ -65,35 +66,22 @@ def get_pmix_store():
     return _get_ext().PMIxC10dStore
 
 
-class PyTorchPMIxStore(dist.Store):
-    def __init__(self, timeout: int = 30):
-        super().__init__()
-        self._store = PMIxStore(timeout)
-
-    def set(self, key, value):
-        self._store.set(key, value)
-
-    def get(self, key):
-        return self._store.get(key)
-
-    @overload
-    def wait(self, keys: list[str]) -> None: ...
-
-    @overload
-    def wait(self, keys: list[str], timeout: timedelta) -> None: ...
-
-    def wait(self, keys: list[str], timeout: timedelta | None) -> None:
-        if timeout is not None:
-            timeout_seconds = int(timeout.total_seconds())
-        else:
-            timeout_seconds = -1
-        return self._store.wait(keys, timeout_seconds)
-
-
-def init_process_group(backend, *args, **kwargs):
+def init_process_group(backend="gloo", *args, gpu_assign_method="local_rank", **kwargs):
     store = get_pmix_store()()
     rank = store.rank()
     world = store.world_size()
+    if backend == "nccl":
+        match gpu_assign_method:
+            case "local_rank":
+                local_rank = store.local_rank()
+                torch.cuda.set_device(local_rank)
+            case "none":
+                pass
+            case _:
+                raise ValueError(
+                    "Wrong value for gpu_assign_method. Supported: local_rank, none"
+                )
+
     dist.init_process_group(
         backend, *args, **kwargs, store=store, rank=rank, world_size=world
     )

@@ -2799,8 +2799,8 @@ packages:
   requires_python: '>=3.9.0'
 - pypi: ./
   name: rixa
-  version: 0.0.2rc2
-  sha256: f3d5cdf9f68fa5836d91c9ce5cbaa5a383d76c344590df2b958b1b3ac5525744
+  version: 0.0.2
+  sha256: b7e14213456983d9e78c5dfb8222a570aa6b54d8d789fbca160ef3d4665b1160
   requires_dist:
   - torch>=2.8.0 ; extra == 'torch'
   - numpy>=1.26 ; extra == 'torch'
