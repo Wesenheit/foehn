@@ -1,7 +1,8 @@
 from datetime import timedelta
-from rixa.PMIx_core import PMIxStore
 import torch.distributed as dist
+from rixa.PMIx_core import PMIxStore
 from typing import overload
+from rixa._rixa_torch import PMIxC10dStore
 
 
 class PyTorchPMIxStore(dist.Store):
@@ -29,8 +30,8 @@ class PyTorchPMIxStore(dist.Store):
         return self._store.wait(keys, timeout_seconds)
 
 
-def init_process_group(*args, **kwargs):
-    store = PyTorchPMIxStore(**kwargs)
-    rank = store._store.get_rank()
-    world = store._store.get_world()
+def init_process_group(backend, *args, **kwargs):
+    store = PMIxC10dStore()
+    rank = store.rank()
+    world = store.world_size()
     dist.init_process_group(*args, **kwargs, store=store, rank=rank, world_size=world)

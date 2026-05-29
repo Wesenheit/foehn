@@ -20,6 +20,7 @@ pytest = ">=9.0.3,<10"
 pip = ">=26.1.1,<27"
 setuptools = ">=82.0.1,<83"
 numpy = ">2.0.0"
+ninja = ">=1.13.2,<2"
 
 [pypi-dependencies]
 rixa = { path = ".", editable = true }

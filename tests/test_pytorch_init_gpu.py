@@ -14,6 +14,8 @@ def is_worker():
 
 if is_worker():
     try:
+        torch.cuda.set_device(0)
+        os.environ["NCCL_ALLOW_SHARE_GPU"] = "1"
         rixa.pytorch.init_process_group("nccl")
 
         is_init = torch.distributed.is_initialized()
@@ -30,14 +32,14 @@ if is_worker():
         sys.exit(1)
 
 
-def test_pytorch_init_isolated(nprocs):
+def test_pytorch_init_isolated(nprocs_gpu):
     env = os.environ.copy()
     env[WORKER_ENV_VAR] = "1"
 
     cmd = [
         "mpirun",
         "-n",
-        nprocs,
+        nprocs_gpu,
         "-x",
         WORKER_ENV_VAR,
         "-x",
@@ -49,7 +51,7 @@ def test_pytorch_init_isolated(nprocs):
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     assert result.returncode == 0, f"Subprocess failed with stderr: {result.stderr}"
-    assert result.stdout.count("PYTORCH_WORKER_CLEAN_EXIT") == int(nprocs)
+    assert result.stdout.count("PYTORCH_WORKER_CLEAN_EXIT") == int(nprocs_gpu)
 
 
 if __name__ == "__main__":

@@ -52,3 +52,6 @@ Rixa_Error rixa_get(GlobalPMIxState *state, rixa_store *store, const char *ket,
 
 Rixa_Error rixa_get(GlobalPMIxState *state, rixa_store *store, const char *ket,
                     Rixa_bytes *out);
+Rixa_Error rixa_wait(GlobalPMIxState *state, rixa_store *store,
+                     const char keys[][PMIX_MAX_KEYLEN], uint32_t n,
+                     uint32_t timout);

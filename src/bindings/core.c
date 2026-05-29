@@ -1,10 +1,13 @@
 #include <Python.h>
 #include <pmix.h>
+#include <pmix_common.h>
+#include <stdio.h>
 #include <string.h>
 #include <structmember.h>
 #include <unistd.h>
 
 #include "pyerrors.h"
+#include "pyport.h"
 #include "rixa_pmix_store.h"
 
 typedef struct {
@@ -144,6 +147,7 @@ static PyObject *get(PyObject *self, PyObject *args) {
 
   PyObject *result;
   result = PyBytes_FromStringAndSize(out.bytes, out.size);
+  free(out.bytes);
   return result;
 }
 
@@ -166,72 +170,32 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   }
 
   Py_ssize_t n = PyList_Size(keys_list);
+  char keys[n][PMIX_MAX_KEYLEN];
 
-  pmix_info_t info[2];
-
-  PMIX_INFO_CONSTRUCT(&info[0]);
-  PMIX_INFO_CONSTRUCT(&info[1]);
-  int wait_flag = 0;
-  PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
-  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &timeout, PMIX_INT);
-  bool found[n];
   for (Py_ssize_t i = 0; i < n; i++) {
-    found[i] = 0;
+    PyObject *key_obj = PyList_GetItem(keys_list, i);
+    const char *key;
+    if (PyUnicode_Check(key_obj)) {
+      key = PyUnicode_AsUTF8(key_obj);
+    } else if (PyBytes_Check(key_obj)) {
+      key = PyBytes_AsString(key_obj);
+    } else {
+      PyErr_SetString(PyExc_TypeError, "key must be str or bytes");
+      return NULL;
+    }
+    strncpy(keys[i], key, PMIX_MAX_KEYLEN);
   }
-  int total_found = 0;
-
-  while (total_found < n) {
-    if (total_sleep > timeout) {
-      PyErr_SetString(PyExc_RuntimeError, "Timeout exceeded");
-      goto err_cleanup;
-    }
-    for (Py_ssize_t i = 0; i < n; i++) {
-      if (found[i])
-        continue;
-      PyObject *key_obj = PyList_GetItem(keys_list, i);
-      const char *key;
-      if (PyUnicode_Check(key_obj)) {
-        key = PyUnicode_AsUTF8(key_obj);
-      } else if (PyBytes_Check(key_obj)) {
-        key = PyBytes_AsString(key_obj);
-      } else {
-        PyErr_SetString(PyExc_TypeError, "key must be str or bytes");
-        goto err_cleanup;
-      }
-
-      pmix_pdata_t pdata[1];
-      PMIX_PDATA_CONSTRUCT(&pdata[0]);
-      strncpy(pdata[0].key, key, PMIX_MAX_KEYLEN);
-      pmix_status_t rc = PMIx_Lookup(pdata, 1, info, 2);
-
-      if (rc == PMIX_ERR_TIMEOUT) {
-        PyErr_Format(PyExc_TimeoutError,
-                     "key '%s' not available within timeout", key);
-        goto err_cleanup;
-      } else if (rc == PMIX_ERR_NOT_FOUND) {
-        continue;
-      } else if (rc != PMIX_SUCCESS) {
-        PyErr_SetString(PyExc_RuntimeError, PMIx_Error_string(rc));
-        goto err_cleanup;
-      }
-      found[i] = 1;
-      total_found += 1;
-      PMIX_PDATA_DESTRUCT(&pdata[0]);
-    }
-    total_sleep += delta_T;
-    usleep(delta_T * 1000);
+  Rixa_Error status = rixa_wait(&state, &self_pmix->store, keys, n, timeout);
+  if (status == RIXA_TIMEOUT) {
+    PyErr_SetString(PyExc_RuntimeError, "Timout reached!");
+    return NULL;
+  } else if (status != RIXA_SUCCESS) {
+    PyErr_SetString(PyExc_RuntimeError, "Error encoutered, failed!");
+    return NULL;
   }
 
-  PMIX_INFO_DESTRUCT(&info[0]);
-  PMIX_INFO_DESTRUCT(&info[1]);
   Py_INCREF(Py_None);
   return Py_None;
-
-err_cleanup: {
-  PMIX_INFO_DESTRUCT(&info[0]);
-  PMIX_INFO_DESTRUCT(&info[1]);
-  return NULL;
-}
 }
 
 // -1. CLEAN UP
