@@ -4,8 +4,20 @@ from rixa.PMIx_core import PMIxStore
 from typing import overload
 import os
 import importlib.util
+from pathlib import Path
+import ctypes
 
 _ext = None
+
+
+def load_pmix():
+    libdir = Path(__file__).resolve().parent.parent / "rixa.libs"
+
+    candidates = list(libdir.glob("libpmix*.so*"))
+    if not candidates:
+        raise RuntimeError("PMIx not found")
+    lib = sorted(candidates)[0]  # or better selection logic
+    ctypes.CDLL(str(lib), mode=ctypes.RTLD_GLOBAL)
 
 
 def _get_ext():
@@ -28,6 +40,7 @@ def _get_ext():
         )
 
     src_dir = os.path.join(os.path.dirname(__file__), "bindings")
+    load_pmix()
 
     _ext = cpp_ext.load(
         name="_rixa_torch",  # no dots in JIT name
@@ -35,8 +48,11 @@ def _get_ext():
             os.path.join(src_dir, "rixa_pmix_store.c"),
             os.path.join(src_dir, "rixa_C10.cpp"),
         ],
-        extra_cflags=["-O3"],
-        extra_ldflags=["-lpmix"],
+        extra_cflags=[
+            "-O3",
+        ],
+        extra_ldflags=["-Wl,-rpath,$ORIGIN/../rixa.libs"],
+        # extra_ldflags=["-lpmix"],
         extra_include_paths=[
             src_dir,
         ],

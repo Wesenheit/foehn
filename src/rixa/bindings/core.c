@@ -153,8 +153,6 @@ static PyObject *get(PyObject *self, PyObject *args) {
 
 // 5. WATI
 static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
-  float delta_T = 0.1;   // Fraction of second for every retry
-  float total_sleep = 0; // total amount of time spend on sleeping
   PyPMIx *self_pmix = (PyPMIx *)self;
   PyObject *keys_list;
   int timeout;

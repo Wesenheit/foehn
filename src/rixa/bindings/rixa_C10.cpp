@@ -2,14 +2,13 @@
 #include <cstdint>
 #include <pmix.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // for std::vector, std::string conversions
+#include <pybind11/stl.h>
 #include <stdexcept>
 #include <string>
 #include <torch/csrc/distributed/c10d/Store.hpp>
 #include <torch/csrc/utils/pybind.h>
 
 namespace py = pybind11;
-// include your C header
 extern "C" {
 #include "rixa_pmix_store.h"
 }

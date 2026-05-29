@@ -30,7 +30,7 @@ auditwheel = ">=6.6.0, <7"
 sphinx = ">=9.1.0, <10"
 sphinx-rtd-theme = ">=3.1.0, <4"
 myst-parser = ">=5.1.0, <6"
-torch = ">2.7.0"
+torch = ">=2.8.0"
 
 [feature.gpu]
 channels = ["pytorch", "nvidia", "conda-forge"]
@@ -61,7 +61,7 @@ compilers = ["c",]
 [package.host-dependencies] 
 libpmix-devel = ">=5.0"
 setuptools = "*"
-pytorch = ">=2.7.0"
+pytorch = ">=2.8.0"
 pybind11 = "*"
 
 [tasks]
