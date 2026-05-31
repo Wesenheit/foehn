@@ -13,7 +13,7 @@ version = "0.0.2"
 [dependencies]
 python = "3.12.*"
 openmpi = ">=5.0"
-libpmix-devel = ">=5.0"
+libpmix = ">=5.0"
 patchelf = ">=0.17.2,<0.19"
 cibuildwheel = ">=3.4.1,<4"
 pytest = ">=9.0.3,<10"
@@ -59,7 +59,7 @@ abi3 = true
 compilers = ["c",]
 
 [package.host-dependencies] 
-libpmix-devel = ">=5.0"
+libpmix = ">=5.0"
 setuptools = "*"
 pytorch = ">=2.8.0"
 pybind11 = "*"

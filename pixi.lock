@@ -47,7 +47,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libnl-3.11.0-hb9d3cd8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libnsl-2.0.1-hb9d3cd8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-5.0.8-h31fc519_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-devel-5.0.8-ha770c72_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libsqlite-3.53.1-h0c1763c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-15.2.0-h934c35e_19.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-ng-15.2.0-hdf11a46_19.conda
@@ -192,7 +191,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/liblzma-5.8.3-h8088a28_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libopenblas-0.3.33-openmp_he657e61_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libpmix-5.0.8-hddb0edd_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libpmix-devel-5.0.8-hce30654_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libsqlite-3.53.1-h1b79a29_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libxml2-16-2.15.3-h6967ea9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libxml2-2.15.3-heed7d32_0.conda
@@ -342,7 +340,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libnvshmem3-3.6.5-hd10980a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libpciaccess-0.19-hb03c661_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-5.0.8-h31fc519_4.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-devel-5.0.8-ha770c72_4.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libsqlite-3.53.1-h0c1763c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-15.2.0-h934c35e_19.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-ng-15.2.0-hdf11a46_19.conda
@@ -1796,26 +1793,6 @@ packages:
   purls: []
   size: 530391
   timestamp: 1770963627741
-- conda: https://conda.anaconda.org/conda-forge/linux-64/libpmix-devel-5.0.8-ha770c72_4.conda
-  sha256: 044df4b27fae2a4d4bba26ba128beb7f6bf0389e56f41031386cebdae3b3de08
-  md5: b3786adde259c9dd8c00bbd28b101532
-  depends:
-  - libpmix 5.0.8 h31fc519_4
-  license: BSD-3-Clause
-  license_family: BSD
-  purls: []
-  size: 219316
-  timestamp: 1770962980001
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/libpmix-devel-5.0.8-hce30654_4.conda
-  sha256: 62c9f62a739d768898c5412c61924f3cb95468980b0b054164810a8f778656ca
-  md5: f4846b3b5f545b23933ad8ee4c0db7a1
-  depends:
-  - libpmix 5.0.8 hddb0edd_4
-  license: BSD-3-Clause
-  license_family: BSD
-  purls: []
-  size: 220333
-  timestamp: 1770963631843
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libsqlite-3.53.1-h0c1763c_0.conda
   sha256: 54cdcd3214313b62c2a8ee277e6f42150d9b748264c1b70d958bf735e420ef8d
   md5: 7dc38adcbf71e6b38748e919e16e0dce
@@ -2799,8 +2776,8 @@ packages:
   requires_python: '>=3.9.0'
 - pypi: ./
   name: rixa
-  version: 0.0.2
-  sha256: b7e14213456983d9e78c5dfb8222a570aa6b54d8d789fbca160ef3d4665b1160
+  version: 0.0.3rc1
+  sha256: 951620596ccae3af30cdce6b9dc797f0e63eba41bfc480f3551797441c3b915f
   requires_dist:
   - torch>=2.8.0 ; extra == 'torch'
   - numpy>=1.26 ; extra == 'torch'

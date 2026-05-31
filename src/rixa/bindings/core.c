@@ -1,6 +1,4 @@
 #include <Python.h>
-#include <pmix.h>
-#include <pmix_common.h>
 #include <stdio.h>
 #include <string.h>
 #include <structmember.h>

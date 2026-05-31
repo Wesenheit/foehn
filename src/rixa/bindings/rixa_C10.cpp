@@ -1,6 +1,5 @@
 #include <chrono>
 #include <cstdint>
-#include <pmix.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <stdexcept>
@@ -85,7 +84,16 @@ public:
   }
 
   bool check(const std::vector<std::string> &keys) override {
-    throw std::runtime_error("Not Implemented");
+    uint32_t flag = 0;
+    for (const std::string &key : keys) {
+      Rixa_Error status = rixa_check(&state, &store, key.data(), &flag);
+      if (status != RIXA_SUCCESS) {
+        throw std::runtime_error("Error during lookup!");
+      }
+      if (!flag)
+        return false;
+    }
+    return true;
   }
 
   void wait(const std::vector<std::string> &keys) override {

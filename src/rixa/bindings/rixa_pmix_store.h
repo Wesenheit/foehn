@@ -1,5 +1,5 @@
 #pragma once
-#include <pmix.h>
+#include "pmix.h"
 #include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +58,9 @@ Rixa_Error rixa_get(GlobalPMIxState *state, rixa_store *store, const char *ket,
 Rixa_Error rixa_wait(GlobalPMIxState *state, rixa_store *store,
                      const char keys[][PMIX_MAX_KEYLEN], uint32_t n,
                      uint32_t timout);
+
+Rixa_Error rixa_check(GlobalPMIxState *state, rixa_store *store,
+                      const char *ket, uint32_t *out);
 
 #ifdef __cplusplus
 }
