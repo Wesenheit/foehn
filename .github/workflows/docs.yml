@@ -1,5 +1,7 @@
 name: Deploy docs
 
+active: false
+
 on:
   push:
     branches: [master]
