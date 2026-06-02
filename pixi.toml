@@ -5,11 +5,6 @@ platforms = ["linux-64", "osx-arm64"]
 channel-priority = "disabled"
 preview = ["pixi-build"]
 
-
-[package]
-name = "rixa"
-version = "0.0.2"
-
 [dependencies]
 python = "3.12.*"
 openmpi = ">=5.0"
@@ -48,6 +43,11 @@ platforms = ["osx-arm64","linux-64"]
 [environments]
 linux-gpu = { features = ["gpu"], solve-group = "gpu-group" }
 default = { features = ["cpu"], solve-group = "cpu-group" }
+
+
+[package]
+name = "rixa"
+version = "0.0.2"
 
 [package.build]
 backend = { name = "pixi-build-python", version = "*" }

@@ -1,4 +1,5 @@
 #include "rixa_pmix_store.h"
+#include <stdint.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -135,7 +136,7 @@ Rixa_Error rixa_wait(GlobalPMIxState *state, rixa_store *store,
   int wait_flag = 0;
   PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
   PMIx_Info_load(&info[1], PMIX_TIMEOUT, &timeout, PMIX_INT);
-  bool found[n];
+  uint32_t found[n];
   for (uint32_t i = 0; i < n; i++) {
     found[i] = 0;
   }

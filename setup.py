@@ -32,17 +32,15 @@ if importlib.util.find_spec("torch"):
             "cxx": [
                 "-std=c++17",
             ],  # only for .cpp files
-            "cc": ["-O3"],  # only for .c files
+            "c": ["-O3"],  # only for .c files
         },
         extra_link_args=[
-            "-Wl,--no-as-needed",
             "-ltorch_python",
-            "-Wl,--as-needed",
         ],
     )
     ext_modules.append(torch_ext)
 
-    cmdclass["build_ext"] = BuildExtension.with_options(use_ninja=False)
+    cmdclass["build_ext"] = BuildExtension.with_options(use_ninja=True)
 
 setup(
     ext_modules=ext_modules,
