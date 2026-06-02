@@ -2,8 +2,6 @@ import os
 import sys
 import subprocess
 import pytest
-import rixa.nvshmem
-import pytest
 
 WORKER_ENV_VAR = "RIXA_NVSHMEM_WORKER"
 
@@ -14,6 +12,7 @@ def is_worker():
 
 if is_worker():
     try:
+        import rixa.nvshmem
         import nvshmem.core as nvshmem
 
         from cuda.core import Device
