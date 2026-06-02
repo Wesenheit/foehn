@@ -3,9 +3,7 @@ import sys
 import subprocess
 import pytest
 import rixa.nvshmem
-import nvshmem.core as nvshmem
-
-from cuda.core import Device
+import pytest
 
 WORKER_ENV_VAR = "RIXA_NVSHMEM_WORKER"
 
@@ -16,6 +14,10 @@ def is_worker():
 
 if is_worker():
     try:
+        import nvshmem.core as nvshmem
+
+        from cuda.core import Device
+
         store = rixa.PMIxStore(30)
         dev = Device(0)
         rixa.nvshmem.init(dev, store, 30)
@@ -31,6 +33,7 @@ if is_worker():
         sys.exit(1)
 
 
+@pytest.mark.gpu
 def test_nvshmem_init_isolated(nprocs):
     env = os.environ.copy()
     env[WORKER_ENV_VAR] = "1"

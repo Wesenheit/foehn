@@ -2,6 +2,7 @@ from rixa.PMIx_core import PMIxStore
 import sys
 import os
 import subprocess
+import pytest
 
 
 def is_worker():
@@ -20,6 +21,7 @@ if is_worker():
     sys.exit(0)
 
 
+@pytest.mark.cpu
 def test_pmix_rank_validity(nprocs):
     env = os.environ.copy()
     env["RIXA_WORKER_MODE"] = "1"

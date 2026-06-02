@@ -67,7 +67,9 @@ pybind11 = "*"
 [tasks]
 build = "pip install --no-build-isolation -e ."
 test = "pytest tests -v"
+test-cpu = "pytest tests -v -m cpu"
 ci = { depends-on = ["build", "test"] }
+ci-cpu = { depends-on = ["build", "test-cpu"] }
 
 ## CLEAN AND TEST OBJECTS
 clean = "rm -rf dist/ wheelhouse/ build/"

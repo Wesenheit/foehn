@@ -30,6 +30,7 @@ if is_worker():
         sys.exit(1)
 
 
+@pytest.mark.cpu
 def test_pytorch_init_isolated(nprocs):
     env = os.environ.copy()
     env[WORKER_ENV_VAR] = "1"
