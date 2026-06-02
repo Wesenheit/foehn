@@ -185,26 +185,10 @@ Rixa_Error rixa_check(GlobalPMIxState *state, rixa_store *store,
                       const char *key, uint32_t *out) {
 
   pmix_pdata_t pdata[1];
-  pmix_info_t info[2];
-
-  PMIX_INFO_CONSTRUCT(&info[0]);
-  PMIX_INFO_CONSTRUCT(&info[1]);
-  int wait_flag = 1; // NOTE: for Lookup, PMIX_WAIT=1 means
-                     // "block until found"
-  PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
-  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &store->timeout, PMIX_INT);
 
   PMIX_PDATA_CONSTRUCT(&pdata[0]);
   strncpy(pdata[0].key, key, PMIX_MAX_KEYLEN);
-
-  pmix_status_t status = PMIx_Lookup(pdata, 1, info, 2);
-  PMIX_INFO_DESTRUCT(&info[0]);
-  PMIX_INFO_DESTRUCT(&info[1]);
-
-  if (status == PMIX_ERR_TIMEOUT) {
-    return RIXA_TIMEOUT;
-  }
-
+  pmix_status_t status = PMIx_Lookup(pdata, 1, NULL, 0);
   PMIX_PDATA_DESTRUCT(&pdata[0]);
   if (status == PMIX_SUCCESS) {
     *out = 1;

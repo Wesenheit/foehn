@@ -14,15 +14,17 @@ if is_worker():
     rank = store.rank()
     if rank == 0:
         store.set("test_values", "1")
+    store.wait(["test_values"])
 
     assert store.check(["test_values"])
+    assert not store.check(["test_values_not"])
 
     print(f"WORKER_SUCCESS_RANK_{rank}")
     sys.exit(0)
 
 
 @pytest.mark.cpu
-def test_pmix_rank_validity(nprocs):
+def test_pmix_check(nprocs):
     env = os.environ.copy()
     env["RIXA_WORKER_MODE"] = "1"
 
