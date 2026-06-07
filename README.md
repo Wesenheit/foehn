@@ -1,5 +1,9 @@
 # Rixa
 
+> ⚠️ **Experimental**
+> This library is in an experimental phase and may be buggy.
+> Expect breaking changes between versions.
+
 Rixa (Runtime Initialization by pmiX Adoption) is a high-performance library that provides a unified and efficient way to bootstrap distributed PyTorch jobs.
 It leverages PMIx 5.0 to seamlessly launch PyTorch workloads on large-scale HPC clusters, eliminating the need to manually specify the master IP address and port.
 
@@ -15,7 +19,7 @@ struggles with scale and reliability on bare-metal HPC clusters.
 
 3. ABI Compatibility: Built on PMIx 5.0+ (ABI stable), ensuring portability across different MPI/PMIx versions.
 
-## Instalation
+## Installation
 In order to install one needs to specify the version of the library. Currently two versions are supported, `pytorch` and `nvshmem`.
 They can be easily installed with
 ```bash
@@ -78,7 +82,7 @@ Alternatively, one can use `pixi build` to compile a conda package.
 
 ## PMIx
 One of the most common ways to bootstrap massive distributed programs is to use Process Management Interface (exascale), PMIx for short. It was designed
-to launch massive MPI jobs across enourmous HPC clusters, some achieving exascale performance.
+to launch massive MPI jobs across enormous HPC clusters, some achieving exascale performance.
 It is integrated with the SLURM job scheduler and can selected to be a default launching
 mechanism. Moreover, the 5th version it is ABI compatible. Hence, it avoids various problems related to the MPI-based programs (for example, `mpi4py`
 needs to be compiled against specific MPI version). This makes this particular approach promising to achieve a platform-independent launching mechanism
