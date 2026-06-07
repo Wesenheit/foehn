@@ -1,6 +1,6 @@
 # Rixa
 
-> ⚠️ **Experimental**
+> [!WARNING]
 > This library is in an experimental phase and may be buggy.
 > Expect breaking changes between versions.
 
@@ -20,6 +20,10 @@ struggles with scale and reliability on bare-metal HPC clusters.
 3. ABI Compatibility: Built on PMIx 5.0+ (ABI stable), ensuring portability across different MPI/PMIx versions.
 
 ## Installation
+> [!NOTE]
+> For detailed installation instructions, see the [wiki](https://github.com/wesenheit/rixa/wiki/Installation).
+
+
 In order to install one needs to specify the version of the library. Currently two versions are supported, `pytorch` and `nvshmem`.
 They can be easily installed with
 ```bash
@@ -29,9 +33,12 @@ pip install "rixa[pytorch]"
 # Install for NVSHMEM support
 pip install "rixa[nvshmem]"
 ```
-For detailed installation instructions, see the [Wiki](https://github.com/wesenheit/rixa/wiki).
 
 ## Usage (PyTorch)
+> [!NOTE]
+> For more use cases, see the [wiki](https://github.com/wesenheit/rixa/wiki/Quick-Start).
+
+
 One can use `rixa` to start pytorch distributed job with one simple line
 ```python
 import rixa
