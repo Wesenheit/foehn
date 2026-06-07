@@ -25,6 +25,7 @@ pip install "rixa[pytorch]"
 # Install for NVSHMEM support
 pip install "rixa[nvshmem]"
 ```
+For detailed installation instructions, see the [Wiki](https://github.com/wesenheit/rixa/wiki).
 
 ## Usage (PyTorch)
 One can use `rixa` to start pytorch distributed job with one simple line
@@ -43,7 +44,7 @@ torch.distributed.destroy_process_group()
 ```
 
 ## Usage (NVSHMEM)
-Nvshmem usage is very simillar to the `pytorch` usage, one needs to use a thin wrapper around the native `nvshmem` init.
+Nvshmem usage is very similar to the `pytorch` usage, one needs to use a thin wrapper around the native `nvshmem` init.
 Example:
 ```python
 import rixa
@@ -77,7 +78,7 @@ Alternatively, one can use `pixi build` to compile a conda package.
 
 ## PMIx
 One of the most common ways to bootstrap massive distributed programs is to use Process Management Interface (exascale), PMIx for short. It was designed
-to launch massive MPI jobs accross enourmous HPC clusters, some achieving exascale performance.
+to launch massive MPI jobs across enourmous HPC clusters, some achieving exascale performance.
 It is integrated with the SLURM job scheduler and can selected to be a default launching
 mechanism. Moreover, the 5th version it is ABI compatible. Hence, it avoids various problems related to the MPI-based programs (for example, `mpi4py`
 needs to be compiled against specific MPI version). This makes this particular approach promising to achieve a platform-independent launching mechanism
