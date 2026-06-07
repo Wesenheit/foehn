@@ -33,13 +33,13 @@ pip install "rixa[pytorch]"
 # Install for NVSHMEM support
 pip install "rixa[nvshmem]"
 ```
-
-## Usage (PyTorch)
+## Usage
 > [!NOTE]
 > For more use cases, see the [wiki](https://github.com/wesenheit/rixa/wiki/Quick-Start).
 
 
-One can use `rixa` to start pytorch distributed job with one simple line
+### PyTorch
+One can use `rixa` to start PyTorch distributed job with one simple line
 ```python
 import rixa
 rixa.pytorch.init_process_group(pytorch_argument1, pytorch_argument2, keyword2=pytorch_parameter)
@@ -54,7 +54,7 @@ Remember to manually finalize the backend!
 torch.distributed.destroy_process_group()
 ```
 
-## Usage (NVSHMEM)
+### NVSHMEM
 Nvshmem usage is very similar to the `pytorch` usage, one needs to use a thin wrapper around the native `nvshmem` init.
 Example:
 ```python
@@ -70,28 +70,8 @@ Remember to manually finalize the backend!
 nvshmem.finalize()
 ```
 
-## Development
-Library can be compiled from source with standard `setuptools` and requires PMIx library supporting version >5.0.
-Development of the package is managed with `pixi` that can be used to also bring all necessary libraries for testing and development.
-It can be locally tested using `prrte` and more recently with OpenMPI provided by `pixi`.
-To build and test the library one can use commands provided in `pixi.toml`.
-```
-pixi run build  #downloads everything and builds
-pixi run test   #launches pytest and uses openmpi>5.0 to launch the test
-pixi run ci     #does both at the same time
-```
-Alternatively, one can use `pixi build` to compile a conda package.
-
 ## Roadmap
 
  - [x] Support for NVSHMEM (pytorch, cupy)
  - [ ] Support for JAX
-
-## PMIx
-One of the most common ways to bootstrap massive distributed programs is to use Process Management Interface (exascale), PMIx for short. It was designed
-to launch massive MPI jobs across enormous HPC clusters, some achieving exascale performance.
-It is integrated with the SLURM job scheduler and can selected to be a default launching
-mechanism. Moreover, the 5th version it is ABI compatible. Hence, it avoids various problems related to the MPI-based programs (for example, `mpi4py`
-needs to be compiled against specific MPI version). This makes this particular approach promising to achieve a platform-independent launching mechanism
-for PyTorch distributed jobs on modern HPC clusters.
 
