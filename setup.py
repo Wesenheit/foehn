@@ -14,10 +14,9 @@ cmdclass = {}
 ext_modules = [core_ext]
 
 if importlib.util.find_spec("torch"):
-    from torch.utils.cpp_extension import CppExtension, BuildExtension
-    import torch
+    from torch.utils.cpp_extension import CppExtension, BuildExtension, library_paths
 
-    torch_lib_path = torch.utils.cpp_extension.library_paths()
+    torch_lib_path = library_paths()
 
     torch_ext = CppExtension(
         name="rixa._rixa_torch",
@@ -26,21 +25,16 @@ if importlib.util.find_spec("torch"):
             "src/rixa/bindings/rixa_C10.cpp",
         ],
         include_dirs=["include", "src/"],
-        libraries=["pmix", "torch", "c10", "torch_python"],
         library_dirs=torch_lib_path,
         extra_compile_args={
             "cxx": [
                 "-std=c++17",
-            ],  # only for .cpp files
-            "c": ["-O3"],  # only for .c files
+            ],
         },
-        extra_link_args=[
-            "-ltorch_python",
-        ],
     )
     ext_modules.append(torch_ext)
 
-    cmdclass["build_ext"] = BuildExtension.with_options(use_ninja=True)
+    cmdclass["build_ext"] = BuildExtension
 
 setup(
     ext_modules=ext_modules,

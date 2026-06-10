@@ -47,7 +47,7 @@ default = { features = ["cpu"], solve-group = "cpu-group" }
 
 [package]
 name = "rixa"
-version = "0.0.2"
+version = "0.0.3"
 
 [package.build]
 backend = { name = "pixi-build-python", version = "*" }

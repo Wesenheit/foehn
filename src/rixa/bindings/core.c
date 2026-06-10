@@ -51,12 +51,12 @@ static int PMIxObjInit(PyObject *self, PyObject *args) {
 
 static PyTypeObject PMIxType = {
     PyVarObject_HEAD_INIT(NULL, 0).tp_name = "PMIx_core.PMIxStore",
-    .tp_doc = "Custom PMX storage for pytorch",
     .tp_basicsize = sizeof(PyPMIx),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_new = PyType_GenericNew,
+    .tp_doc = "Custom PMX storage",
     .tp_init = (initproc)PMIxObjInit, // Default constructor
+    .tp_new = PyType_GenericNew,
 };
 // IMPLEMENTATIONS
 
