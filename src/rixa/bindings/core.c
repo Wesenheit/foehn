@@ -15,16 +15,25 @@ typedef struct {
 static GlobalPMIxState state;
 
 Py_ssize_t get_string_from_python(PyObject *val_obj, const char **out) {
-  Py_ssize_t return_val;
+  Py_ssize_t len = 0;
+
   if (PyBytes_Check(val_obj)) {
-    PyBytes_AsStringAndSize(val_obj, (char **)out, &return_val);
-  } else if (PyUnicode_Check(val_obj)) {
-    *out = PyUnicode_AsUTF8(val_obj);
-    return_val = strlen(*out);
-  } else {
-    return 0;
+    if (PyBytes_AsStringAndSize(val_obj, (char **)out, &len) < 0) {
+      return -1;
+    }
+    return len;
   }
-  return return_val;
+
+  if (PyUnicode_Check(val_obj)) {
+    const char *s = PyUnicode_AsUTF8AndSize(val_obj, &len);
+    if (!s) {
+      return -1;
+    }
+    *out = s;
+    return len;
+  }
+
+  return -1;
 }
 
 static int PMIxObjInit(PyObject *self, PyObject *args) {
@@ -49,15 +58,6 @@ static int PMIxObjInit(PyObject *self, PyObject *args) {
   return 0;
 }
 
-static PyTypeObject PMIxType = {
-    PyVarObject_HEAD_INIT(NULL, 0).tp_name = "PMIx_core.PMIxStore",
-    .tp_basicsize = sizeof(PyPMIx),
-    .tp_itemsize = 0,
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_doc = "Custom PMX storage",
-    .tp_init = (initproc)PMIxObjInit, // Default constructor
-    .tp_new = PyType_GenericNew,
-};
 // IMPLEMENTATIONS
 
 // 1. GET RANK
@@ -184,7 +184,7 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
     PyObject *key_obj = PyList_GetItem(keys_list, i);
     const char *key;
     if (PyUnicode_Check(key_obj)) {
-      key = PyUnicode_AsUTF8(key_obj);
+      key = PyUnicode_AsUTF8AndSize(key_obj, NULL);
     } else if (PyBytes_Check(key_obj)) {
       key = PyBytes_AsString(key_obj);
     } else {
@@ -221,26 +221,41 @@ static PyMethodDef Custom_methods[] = {
     {"set", set, METH_VARARGS, "set a key-value pair"},
     {"get", get, METH_VARARGS, "get a value for given key"},
     {"wait", wait_for_keys, METH_VARARGS, "wait for arrays of keys"},
-    {NULL}};
+    {NULL, NULL, 0, NULL}};
 
 static struct PyModuleDef coremodule = {
     PyModuleDef_HEAD_INIT, "_core", NULL, -1, NULL, NULL, NULL, NULL, NULL};
 
+static PyType_Slot PMIx_slots[] = {{Py_tp_doc, (void *)"Custom PMX storage"},
+                                   {Py_tp_init, (void *)(initproc)PMIxObjInit},
+                                   {Py_tp_new, (void *)PyType_GenericNew},
+                                   {Py_tp_methods, (void *)Custom_methods},
+                                   {0, NULL}};
+
+static PyType_Spec PMIxType_spec = {.name = "PMIx_core.PMIxStore",
+                                    .basicsize = sizeof(PyPMIx),
+                                    .itemsize = 0,
+                                    .flags = Py_TPFLAGS_DEFAULT |
+                                             Py_TPFLAGS_BASETYPE,
+                                    .slots = PMIx_slots};
+
+static PyObject *PMIxType = NULL;
+
 PyMODINIT_FUNC PyInit_PMIx_core(void) {
   PyObject *m;
-
-  PMIxType.tp_methods = Custom_methods;
-
-  if (PyType_Ready(&PMIxType) < 0)
-    return NULL;
 
   m = PyModule_Create(&coremodule);
   if (m == NULL)
     return NULL;
 
-  Py_INCREF(&PMIxType);
-  if (PyModule_AddObject(m, "PMIxStore", (PyObject *)&PMIxType) < 0) {
-    Py_DECREF(&PMIxType);
+  PMIxType = PyType_FromSpec(&PMIxType_spec);
+  if (PMIxType == NULL) {
+    Py_DECREF(m);
+    return NULL;
+  }
+
+  if (PyModule_AddObjectRef(m, "PMIxStore", PMIxType) < 0) {
+    Py_DECREF(PMIxType);
     Py_DECREF(m);
     return NULL;
   }
