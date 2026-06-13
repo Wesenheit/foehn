@@ -51,8 +51,8 @@ def _get_ext():
     _ext = cpp_ext.load(
         name="_rixa_torch",
         sources=[
-            os.path.join(src_dir, "rixa_pmix_store.c"),
-            os.path.join(src_dir, "rixa_C10.cpp"),
+            os.path.join(src_dir, "Rixa_pmix.cpp"),
+            os.path.join(src_dir, "Rixa_C10.cpp"),
         ],
         extra_cflags=[
             "-O3",

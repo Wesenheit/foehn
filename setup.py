@@ -3,7 +3,10 @@ import importlib.util
 
 core_ext = Extension(
     "rixa.PMIx_core",
-    sources=["src/rixa/bindings/core.c", "src/rixa/bindings/rixa_pmix_store.c"],
+    sources=[
+        "src/rixa/bindings/Rixa_python_native.cpp",
+        "src/rixa/bindings/Rixa_pmix.cpp",
+    ],
     include_dirs=["include"],
     libraries=["pmix"],
     language="c",
@@ -25,8 +28,8 @@ if importlib.util.find_spec("torch"):
     torch_ext = CppExtension(
         name="rixa._rixa_torch",
         sources=[
-            "src/rixa/bindings/rixa_pmix_store.c",
-            "src/rixa/bindings/rixa_C10.cpp",
+            "src/rixa/bindings/Rixa_pmix.cpp",
+            "src/rixa/bindings/Rixa_C10.cpp",
         ],
         include_dirs=["include", "src/"],
         library_dirs=torch_lib_path,
