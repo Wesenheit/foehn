@@ -1,5 +1,5 @@
 #pragma once
-#include "pmix.h"
+#include "pmix_headers/pmix.h"
 #include <stdint.h>
 #ifdef __cplusplus
 extern "C" {

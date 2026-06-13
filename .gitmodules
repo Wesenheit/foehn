@@ -1,0 +1,3 @@
+[submodule "src/rixa/bindings/pmix_headers"]
+	path = src/rixa/bindings/pmix_headers
+	url = https://github.com/pmix/pmix-abi.git
