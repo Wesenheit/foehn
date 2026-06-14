@@ -1,0 +1,12 @@
+ARG BASE_IMAGE=quay.io/pypa/manylinux_2_28_x86_64
+FROM ${BASE_IMAGE}
+
+COPY scripts/build_pmix.sh /tmp/build_pmix.sh
+
+LABEL org.opencontainers.image.source=https://github.com/wesenheit/rixa
+
+RUN chmod +x /tmp/build_pmix.sh && \
+    /tmp/build_pmix.sh && \
+    rm /tmp/build_pmix.sh
+
+RUN echo "/tmp/pmix/lib" > /etc/ld.so.conf.d/pmix.conf && ldconfig

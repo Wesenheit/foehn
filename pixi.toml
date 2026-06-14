@@ -83,7 +83,7 @@ audit-test = "auditwheel repair dist/*.whl -w wheelhouse/"
 pre-publish-test = { depends-on = ["clean","wheel-test","sdist", "audit-test","check-wheel","check-dist"]}
 
 ## PRODUCTION BUILD
-build-wheelhouse = "cibuildwheel --config-file cibuildwheel.toml"
+build-wheelhouse = "cibuildwheel --config-file cibuildwheel.toml --platform linux --archs aarch64,x86_64"
 pre-publish = { depends-on = ["clean", "build-wheelhouse", "sdist","check-wheel","check-dist"]}
 
 ## PUBLISH
