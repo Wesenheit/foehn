@@ -1,10 +1,11 @@
 #include <Python.h>
 #include <array>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <vector>
 
-#include "Rixa_pmix.h"
+#include "Rixa_pmix.hpp"
 #include "unicodeobject.h"
 
 // ── Python object
@@ -45,8 +46,11 @@ static Py_ssize_t get_string_from_python(PyObject *val_obj, const char **out) {
 static int PMIxObjInit(PyObject *self, PyObject *args, PyObject *kwargs) {
   auto *self_pmix = reinterpret_cast<PyPMIx *>(self);
 
-  if (!PyArg_ParseTuple(args, "i", &self_pmix->store.timeout))
+  int timeout;
+  if (!PyArg_ParseTuple(args, "i", &timeout))
     return -1;
+
+  self_pmix->store.timeout = std::chrono::seconds(timeout);
 
   if (state.init) {
     PyErr_SetString(PyExc_RuntimeError, "PMIx already started!");
@@ -74,7 +78,7 @@ static void PMIxCleanup() {
 // ──────────────────────────────────────────────────────────────────
 
 static PyObject *get_rank_python(PyObject *self, PyObject *) {
-  int rank = rixa_get_rank(&state);
+  int rank = rixa_get_rank(state);
   if (rank < 0) {
     PyErr_SetString(PyExc_RuntimeError,
                     "PMIx runtime not started, failed to query rank!");
@@ -84,7 +88,7 @@ static PyObject *get_rank_python(PyObject *self, PyObject *) {
 }
 
 static PyObject *get_local_rank_python(PyObject *self, PyObject *) {
-  int rank = rixa_get_local_rank(&state);
+  int rank = rixa_get_local_rank(state);
   if (rank < 0) {
     PyErr_SetString(PyExc_RuntimeError,
                     "PMIx runtime not started, failed to query local rank!");
@@ -97,7 +101,7 @@ static PyObject *get_local_rank_python(PyObject *self, PyObject *) {
 // ─────────────────────────────────────────────────────────────────
 
 static PyObject *get_world_python(PyObject *self, PyObject *) {
-  int world = rixa_get_world(&state);
+  int world = rixa_get_world(state);
   if (world < 0) {
     PyErr_SetString(PyExc_RuntimeError,
                     "PMIx runtime not started, failed to query world!");
@@ -110,6 +114,7 @@ static PyObject *get_world_python(PyObject *self, PyObject *) {
 // ───────────────────────────────────────────────────────────────────────
 
 static PyObject *pmix_set(PyObject *self, PyObject *args) {
+  auto *self_pmix = reinterpret_cast<PyPMIx *>(self);
   PyObject *key_obj, *val_obj;
   if (!PyArg_ParseTuple(args, "OO", &key_obj, &val_obj))
     return nullptr;
@@ -125,8 +130,8 @@ static PyObject *pmix_set(PyObject *self, PyObject *args) {
     return nullptr;
   }
 
-  RixaError status =
-      rixa_set(&state, nullptr, key, val, static_cast<uint32_t>(size_val));
+  RixaError status = rixa_set(state, self_pmix->store, key, val,
+                              static_cast<uint32_t>(size_val));
   if (status != RixaError::Success) {
     PyErr_Format(PyExc_RuntimeError, "(set) failed to push key '%s'", key);
     return nullptr;
@@ -152,7 +157,7 @@ static PyObject *pmix_get(PyObject *self, PyObject *args) {
   }
 
   RixaBytes out{};
-  RixaError status = rixa_get(&state, &self_pmix->store, key, &out);
+  RixaError status = rixa_get(state, self_pmix->store, key, out);
 
   if (status == RixaError::Timeout) {
     PyErr_Format(PyExc_TimeoutError, "(get) timeout waiting for key '%s'", key);
@@ -178,9 +183,6 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   int timeout = -1;
   if (!PyArg_ParseTuple(args, "O|i", &keys_list, &timeout))
     return nullptr;
-
-  if (timeout < 0)
-    timeout = self_pmix->store.timeout;
 
   if (!PyList_Check(keys_list)) {
     PyErr_SetString(PyExc_TypeError, "keys must be a list");
@@ -208,7 +210,7 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   }
 
   RixaError status = rixa_wait(
-      &state, &self_pmix->store,
+      state, self_pmix->store,
       reinterpret_cast<const char (*)[PMIX_MAX_KEYLEN]>(keys[0].data()),
       static_cast<uint32_t>(n), static_cast<uint32_t>(timeout));
 

@@ -11,7 +11,7 @@
 #include <torch/csrc/distributed/c10d/Store.hpp>
 #include <torch/csrc/utils/pybind.h>
 
-#include "Rixa_pmix.h"
+#include "Rixa_pmix.hpp"
 
 namespace py = pybind11;
 
@@ -28,7 +28,6 @@ public:
   PMIxC10dStore() { init(); }
   ~PMIxC10dStore() override { finalize(); }
 
-  // non-copyable — singleton state makes copying meaningless
   PMIxC10dStore(const PMIxC10dStore &) = delete;
   PMIxC10dStore &operator=(const PMIxC10dStore &) = delete;
 
@@ -37,8 +36,7 @@ public:
     if (rc != PMIX_SUCCESS)
       throw std::runtime_error("PMIx failed to initialize!");
     state.init = true;
-    store_.timeout = 30;
-    timeout_ = std::chrono::milliseconds{30'000};
+    store_.timeout = std::chrono::milliseconds{30'000};
   }
 
   void finalize() {
@@ -55,7 +53,7 @@ public:
   // ── set ───────────────────────────────────────────────────────────────────
 
   void set(const std::string &key, const std::vector<uint8_t> &value) override {
-    RixaError rc = rixa_set(&state, nullptr, key.c_str(),
+    RixaError rc = rixa_set(state, store_, key.c_str(),
                             reinterpret_cast<const char *>(value.data()),
                             static_cast<uint32_t>(value.size()));
     if (rc != RixaError::Success)
@@ -66,7 +64,7 @@ public:
 
   std::vector<uint8_t> get(const std::string &key) override {
     RixaBytes out{};
-    RixaError rc = rixa_get(&state, &store_, key.c_str(), &out);
+    RixaError rc = rixa_get(state, store_, key.c_str(), out);
     if (rc != RixaError::Success)
       throw std::runtime_error("PMIxStore::get failed for key: " + key);
 
@@ -92,8 +90,8 @@ public:
 
   bool check(const std::vector<std::string> &keys) override {
     for (const auto &key : keys) {
-      uint32_t flag = 0;
-      RixaError status = rixa_check(&state, &store_, key.data(), &flag);
+      bool flag = 0;
+      RixaError status = rixa_check(state, store_, key.data(), flag);
       if (status != RixaError::Success)
         throw std::runtime_error("PMIxStore::check error on key: " + key);
       if (!flag)
@@ -118,7 +116,7 @@ public:
     }
 
     RixaError rc = rixa_wait(
-        &state, &store_,
+        state, store_,
         reinterpret_cast<const char (*)[PMIX_MAX_KEYLEN]>(ckeys[0].data()),
         static_cast<uint32_t>(keys.size()),
         static_cast<uint32_t>(timeout.count() / 1000));
@@ -159,25 +157,23 @@ public:
   int64_t getNumKeys() override { return 0; }
 
   void setTimeout(const std::chrono::milliseconds &timeout) override {
-    store_.timeout = static_cast<int>(timeout.count() / 1000);
-    timeout_ = timeout;
+    store_.timeout = timeout;
   }
 
   const std::chrono::milliseconds &getTimeout() const noexcept override {
-    return timeout_;
+    return store_.timeout;
   }
 
   bool hasExtendedApi() const override { return false; }
 
   // ── rixa extras ───────────────────────────────────────────────────────────
 
-  int rank() const noexcept { return rixa_get_rank(&state); }
-  int world_size() const noexcept { return rixa_get_world(&state); }
-  int local_rank() const noexcept { return rixa_get_local_rank(&state); }
+  int rank() const noexcept { return rixa_get_rank(state); }
+  int world_size() const noexcept { return rixa_get_world(state); }
+  int local_rank() const noexcept { return rixa_get_local_rank(state); }
 
 private:
   RixaStore store_{};
-  std::chrono::milliseconds timeout_{30'000};
 };
 
 // ── pybind11 module

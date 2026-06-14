@@ -1,4 +1,4 @@
-#include "Rixa_pmix.h"
+#include "Rixa_pmix.hpp"
 #include <chrono>
 #include <cstdint>
 #include <cstring>
@@ -21,19 +21,19 @@ template <std::size_t N> struct PmixInfoGuard {
   pmix_info_t &operator[](std::size_t i) { return data[i]; }
 };
 
-int rixa_get_rank(GlobalPMIxState *state) noexcept {
-  if (!state->init)
+int rixa_get_rank(GlobalPMIxState &state) noexcept {
+  if (!state.init)
     return -1;
-  return static_cast<int>(state->proc.rank);
+  return static_cast<int>(state.proc.rank);
 }
 
-int rixa_get_local_rank(GlobalPMIxState *state) noexcept {
-  if (!state->init)
+int rixa_get_local_rank(GlobalPMIxState &state) noexcept {
+  if (!state.init)
     return -1;
 
   pmix_value_t *val = nullptr;
   pmix_status_t status =
-      PMIx_Get(&state->proc, PMIX_LOCAL_RANK, nullptr, 0, &val);
+      PMIx_Get(&state.proc, PMIX_LOCAL_RANK, nullptr, 0, &val);
 
   if (status != PMIX_SUCCESS || val == nullptr)
     return -1;
@@ -43,13 +43,13 @@ int rixa_get_local_rank(GlobalPMIxState *state) noexcept {
   return static_cast<int>(rc);
 }
 
-int rixa_get_world(GlobalPMIxState *state) noexcept {
-  if (!state->init)
+int rixa_get_world(GlobalPMIxState &state) noexcept {
+  if (!state.init)
     return -1;
 
   pmix_value_t *val = nullptr;
   pmix_proc_t job_info;
-  PMIX_LOAD_NSPACE(job_info.nspace, state->proc.nspace);
+  PMIX_LOAD_NSPACE(job_info.nspace, state.proc.nspace);
   job_info.rank = PMIX_RANK_WILDCARD;
 
   pmix_status_t rc = PMIx_Get(&job_info, PMIX_JOB_SIZE, nullptr, 0, &val);
@@ -62,7 +62,7 @@ int rixa_get_world(GlobalPMIxState *state) noexcept {
   return static_cast<int>(world_size);
 }
 
-RixaError rixa_set(GlobalPMIxState *state, RixaStore *store, const char *key,
+RixaError rixa_set(GlobalPMIxState &state, RixaStore &store, const char *key,
                    const char *val, uint32_t val_len) noexcept {
 
   char *val_copy = static_cast<char *>(std::malloc(val_len));
@@ -93,13 +93,15 @@ RixaError rixa_set(GlobalPMIxState *state, RixaStore *store, const char *key,
 // ── get
 // ───────────────────────────────────────────────────────────────────────
 
-RixaError rixa_get(GlobalPMIxState *state, RixaStore *store, const char *key,
-                   RixaBytes *out) noexcept {
+RixaError rixa_get(GlobalPMIxState &state, RixaStore &store, const char *key,
+                   RixaBytes &out) noexcept {
 
-  PmixInfoGuard<2> info; // DESTRUCT called automatically on all exits
+  PmixInfoGuard<2> info;
   int wait_flag = 1;
+  auto s = std::chrono::duration_cast<std::chrono::seconds>(store.timeout);
+  int seconds_int = s.count();
   PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
-  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &store->timeout, PMIX_INT);
+  PMIx_Info_load(&info[1], PMIX_TIMEOUT, &seconds_int, PMIX_INT);
 
   pmix_pdata_t pdata[1];
   PMIX_PDATA_CONSTRUCT(&pdata[0]);
@@ -122,13 +124,13 @@ RixaError rixa_get(GlobalPMIxState *state, RixaStore *store, const char *key,
     return RixaError::OtherError;
   }
 
-  out->size = static_cast<uint32_t>(bo->size);
-  out->data = static_cast<char *>(std::malloc(out->size));
-  if (!out->data) {
+  out.size = static_cast<uint32_t>(bo->size);
+  out.data = static_cast<char *>(std::malloc(out.size));
+  if (!out.data) {
     PMIX_PDATA_DESTRUCT(&pdata[0]);
     return RixaError::OtherError;
   }
-  std::memcpy(out->data, bo->bytes, out->size);
+  std::memcpy(out.data, bo->bytes, out.size);
 
   PMIX_PDATA_DESTRUCT(&pdata[0]);
   return RixaError::Success;
@@ -137,15 +139,20 @@ RixaError rixa_get(GlobalPMIxState *state, RixaStore *store, const char *key,
 // ── wait
 // ──────────────────────────────────────────────────────────────────────
 
-RixaError rixa_wait(GlobalPMIxState *state, RixaStore *store,
+RixaError rixa_wait(GlobalPMIxState &state, RixaStore &store,
                     const char keys[][PMIX_MAX_KEYLEN], uint32_t n,
                     uint32_t timeout) noexcept {
 
   using namespace std::chrono;
   using namespace std::chrono_literals;
 
-  if (timeout == 0)
-    timeout = static_cast<uint32_t>(store->timeout);
+  seconds timeout_s;
+  if (timeout <= 0) {
+    timeout_s = std::chrono::duration_cast<std::chrono::seconds>(store.timeout);
+    timeout = timeout_s.count();
+  } else {
+    timeout_s = seconds(timeout);
+  }
 
   PmixInfoGuard<2> info;
   int wait_flag = 0;
@@ -156,7 +163,7 @@ RixaError rixa_wait(GlobalPMIxState *state, RixaStore *store,
   uint32_t total_found = 0;
 
   constexpr auto delta = 100ms;
-  auto deadline = steady_clock::now() + seconds(timeout);
+  auto deadline = steady_clock::now() + timeout_s;
 
   while (total_found < n) {
     if (steady_clock::now() > deadline)
@@ -189,8 +196,8 @@ RixaError rixa_wait(GlobalPMIxState *state, RixaStore *store,
   return RixaError::Success;
 }
 
-RixaError rixa_check(GlobalPMIxState *state, RixaStore *store, const char *key,
-                     uint32_t *out) noexcept {
+RixaError rixa_check(GlobalPMIxState &state, RixaStore &store, const char *key,
+                     bool &out) noexcept {
 
   pmix_pdata_t pdata[1];
   PMIX_PDATA_CONSTRUCT(&pdata[0]);
@@ -199,11 +206,11 @@ RixaError rixa_check(GlobalPMIxState *state, RixaStore *store, const char *key,
   PMIX_PDATA_DESTRUCT(&pdata[0]);
 
   if (status == PMIX_SUCCESS) {
-    *out = 1;
+    out = 1;
     return RixaError::Success;
   }
   if (status == PMIX_ERR_NOT_FOUND) {
-    *out = 0;
+    out = 0;
     return RixaError::Success;
   }
   return RixaError::LookupError;

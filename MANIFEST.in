@@ -1,1 +1,1 @@
-recursive-include src/rixa/bindings *.cpp *.h
+recursive-include src/rixa/bindings *.cpp *.h *.hpp

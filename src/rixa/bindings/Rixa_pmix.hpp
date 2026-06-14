@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pmix_headers/pmix.h"
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -48,22 +49,22 @@ struct GlobalPMIxState {
 };
 
 struct RixaStore {
-  int timeout = 30; // seconds
+  std::chrono::milliseconds timeout;
 };
 
-int rixa_get_rank(GlobalPMIxState *state) noexcept;
-int rixa_get_world(GlobalPMIxState *state) noexcept;
-int rixa_get_local_rank(GlobalPMIxState *state) noexcept;
+int rixa_get_rank(GlobalPMIxState &state) noexcept;
+int rixa_get_world(GlobalPMIxState &state) noexcept;
+int rixa_get_local_rank(GlobalPMIxState &state) noexcept;
 
-RixaError rixa_set(GlobalPMIxState *state, RixaStore *store, const char *key,
+RixaError rixa_set(GlobalPMIxState &state, RixaStore &store, const char *key,
                    const char *val, uint32_t val_len) noexcept;
 
-RixaError rixa_get(GlobalPMIxState *state, RixaStore *store, const char *key,
-                   RixaBytes *out) noexcept;
+RixaError rixa_get(GlobalPMIxState &state, RixaStore &store, const char *key,
+                   RixaBytes &out) noexcept;
 
-RixaError rixa_wait(GlobalPMIxState *state, RixaStore *store,
+RixaError rixa_wait(GlobalPMIxState &state, RixaStore &store,
                     const char keys[][PMIX_MAX_KEYLEN], uint32_t n,
                     uint32_t timeout) noexcept;
 
-RixaError rixa_check(GlobalPMIxState *state, RixaStore *store, const char *key,
-                     uint32_t *out) noexcept;
+RixaError rixa_check(GlobalPMIxState &state, RixaStore &store, const char *key,
+                     bool &out) noexcept;
