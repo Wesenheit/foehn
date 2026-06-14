@@ -1,8 +1,10 @@
-from rixa.PMIx_core import PMIxStore
-import sys
 import os
 import subprocess
+import sys
+
 import pytest
+
+from rixa.PMIx_core import PMIxStore
 
 
 def is_worker():

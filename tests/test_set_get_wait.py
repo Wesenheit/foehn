@@ -1,8 +1,10 @@
-import sys
 import os
 import subprocess
-from rixa.pytorch import get_pmix_store
+import sys
+
 import pytest
+
+from rixa.pytorch import get_pmix_store
 
 
 def is_worker():

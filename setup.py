@@ -1,5 +1,6 @@
-from setuptools import setup, Extension
 import importlib.util
+
+from setuptools import Extension, setup
 
 core_ext = Extension(
     "rixa.PMIx_core",
@@ -21,7 +22,7 @@ cmdclass = {}
 ext_modules = [core_ext]
 
 if importlib.util.find_spec("torch"):
-    from torch.utils.cpp_extension import CppExtension, BuildExtension, library_paths
+    from torch.utils.cpp_extension import BuildExtension, CppExtension, library_paths
 
     torch_lib_path = library_paths()
 

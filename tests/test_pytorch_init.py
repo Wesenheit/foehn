@@ -1,8 +1,10 @@
 import os
-import sys
 import subprocess
+import sys
+
 import pytest
 import torch
+
 import rixa
 
 WORKER_ENV_VAR = "RIXA_PYTORCH_WORKER"

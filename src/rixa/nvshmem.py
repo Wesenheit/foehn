@@ -1,6 +1,7 @@
-from cuda.core import Device
-import nvshmem.core as nvshmem
 import numpy as np
+import nvshmem.core as nvshmem
+from cuda.core import Device
+
 from rixa.PMIx_core import PMIxStore
 
 

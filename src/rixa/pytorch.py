@@ -1,11 +1,12 @@
-import torch.distributed as dist
-import os
-import importlib.util
-from pathlib import Path
 import ctypes
-import torch
-import torch.utils.cpp_extension as cpp_ext
+import importlib.util
+import os
 import warnings
+from pathlib import Path
+
+import torch
+import torch.distributed as dist
+import torch.utils.cpp_extension as cpp_ext
 
 _ext = None
 
@@ -46,7 +47,7 @@ def _get_ext():
     try:
         load_pmix_wheel()
     except RuntimeError:
-        warnings.warn("Using global pmix to compile torch extension")
+        warnings.warn("Using global pmix to compile torch extension", stacklevel=2)
 
     _ext = cpp_ext.load(
         name="_rixa_torch",
