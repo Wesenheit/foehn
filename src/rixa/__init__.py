@@ -19,13 +19,18 @@ if importlib.util.find_spec("torch") is not None:
     from . import pytorch
 
     if not (pytorch.is_compiled_source() or pytorch.is_compiled_lazy()):
-        if is_distributed_env() and is_strict:
-            raise RuntimeError(
-                "Pytorch support and pmix is set up but noting is yet compiled!\n"
-                'In order to compile the extension do python -c "import rixa"  '
-            )
+        if is_distributed_env():
+            if is_strict:
+                raise RuntimeError(
+                    "Pytorch support and pmix is set up but noting is yet compiled!\n"
+                    'In order to compile the extension do python -c "import rixa"  '
+                )
+            else:
+                warnings.warn(
+                    "Distributed env detected but extension is not compiled!",
+                    stacklevel=2,
+                )
         else:
-            warnings.warning("Distributed env detected but extension is not compiled!")
             pytorch.get_pmix_store()
     __all__ += ["pytorch"]
 
