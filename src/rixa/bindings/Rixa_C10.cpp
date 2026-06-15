@@ -90,8 +90,8 @@ public:
 
   bool check(const std::vector<std::string> &keys) override {
     for (const auto &key : keys) {
-      bool flag = 0;
-      RixaError status = rixa_check(state, store_, key.data(), flag);
+      bool flag = false;
+      RixaError status = rixa_check(state, store_, key.c_str(), flag);
       if (status != RixaError::Success)
         throw std::runtime_error("PMIxStore::check error on key: " + key);
       if (!flag)

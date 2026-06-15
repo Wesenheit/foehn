@@ -10,7 +10,7 @@ core_ext = Extension(
     ],
     include_dirs=["include"],
     libraries=["pmix"],
-    language="c",
+    language="c++",
     extra_compile_args=["-O3"],
     py_limited_api=True,
     define_macros=[

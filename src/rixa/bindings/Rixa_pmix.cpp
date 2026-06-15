@@ -206,11 +206,11 @@ RixaError rixa_check(GlobalPMIxState &state, RixaStore &store, const char *key,
   PMIX_PDATA_DESTRUCT(&pdata[0]);
 
   if (status == PMIX_SUCCESS) {
-    out = 1;
+    out = true;
     return RixaError::Success;
   }
   if (status == PMIX_ERR_NOT_FOUND) {
-    out = 0;
+    out = false;
     return RixaError::Success;
   }
   return RixaError::LookupError;
