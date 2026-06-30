@@ -215,84 +215,88 @@ RixaError rixa_check(GlobalPMIxState &state, RixaStore &store, const char *key,
   }
   return RixaError::LookupError;
 }
-RixaError rixa_broadcast(GlobalPMIxState &state, RixaStore &store,
-                         uint32_t root, const char *key, const char *val,
-                         uint32_t val_len, RixaBytes &out) noexcept {
 
+RixaError rixa_broadcast(GlobalPMIxState &state, RixaStore &store,
+                          uint32_t root, const char *key, const char *val,
+                          uint32_t val_len, RixaBytes &out) noexcept {
   auto rank = rixa_get_rank(state);
   if (rank == root) {
-    // Broadcasting from the root rank
-    char *val_copy = static_cast<char *>(std::malloc(val_len));
-    if (!val_copy)
+    if (val_len > 0 && !val) {
       return RixaError::OtherError;
+    }
+
+    char *val_copy = static_cast<char *>(std::malloc(val_len));
     std::memcpy(val_copy, val, val_len);
 
     pmix_value_t PMIX_value;
-    pmix_byte_object_t PMIX_bytes;
-    PMIX_bytes.bytes = val_copy;
-    PMIX_bytes.size = val_len;
-
+    PMIX_VALUE_CONSTRUCT(&PMIX_value);
     PMIX_value.type = PMIX_BYTE_OBJECT;
-    PMIX_value.data.bo = PMIX_bytes;
-    pmix_status_t status = PMIx_Put(PMIX_GLOBAL, key, &PMIX_value);
-    PMIX_VALUE_DESTRUCT(&PMIX_value);
+    PMIX_value.data.bo.bytes = val_copy;
+    PMIX_value.data.bo.size = val_len;
 
-    if (status != PMIX_SUCCESS)
+    pmix_status_t status = PMIx_Put(PMIX_GLOBAL, key, &PMIX_value);
+    if (status != PMIX_SUCCESS) {
+      PMIX_VALUE_DESTRUCT(&PMIX_value);
       return RixaError::PublishError;
+    }
 
     status = PMIx_Commit();
+    PMIX_VALUE_DESTRUCT(&PMIX_value);
     if (status != PMIX_SUCCESS)
       return RixaError::CommitError;
-  } else {
-      PmixInfoGuard<2> info;
-      int wait_flag = 1;
-      auto s = std::chrono::duration_cast<std::chrono::seconds>(store.timeout);
-      int seconds_int = s.count();
-      PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_INT);
-      PMIx_Info_load(&info[1], PMIX_TIMEOUT, &seconds_int, PMIX_INT);
-
-      //pmix_pdata_t pdata[1];
-      //PMIX_PDATA_CONSTRUCT(&pdata[0]);
-      //std::strncpy(pdata[0].key, key, PMIX_MAX_KEYLEN);
-
-      pmix_proc_t proc;
-      PMIX_PROC_CONSTRUCT(&proc);
-      PMIX_PROC_LOAD(&proc, state.proc.nspace, PMIX_RANK_UNDEF);
-
-      //pmix_status_t status = PMIx_Lookup(pdata, 1, info.get(), 2);
-
-      pmix_value_t *return_val;
-      pmix_status_t status = PMIx_Get(&proc, key, info.get(), 2, &return_val);
-      PMIX_PROC_DESTRUCT(&proc);
-
-
-      if (status == PMIX_ERR_TIMEOUT) {
-        PMIX_VALUE_RELEASE(return_val);
-        return RixaError::Timeout;
-      }
-      if (status != PMIX_SUCCESS) {
-        PMIX_VALUE_RELEASE(return_val);
-        return RixaError::OtherError;
-      }
-
-      pmix_byte_object_t &bo = return_val->data.bo;
-      if (!bo.bytes) {
-        PMIX_VALUE_RELEASE(return_val);
-        return RixaError::OtherError;
-      }
-
-      out.size = static_cast<uint32_t>(bo.size);
-      out.data = static_cast<char *>(std::malloc(out.size));
-      if (!out.data) {
-        PMIX_VALUE_RELEASE(return_val);
-        return RixaError::OtherError;
-      }
-      std::memcpy(out.data, bo.bytes, out.size);
-      PMIX_VALUE_RELEASE(return_val);
   }
+
   pmix_status_t status = PMIx_Fence(NULL, 0, NULL, 0);
   if (status != PMIX_SUCCESS)
     return RixaError::OtherError;
 
+  if (root !=rank){
+    PmixInfoGuard<2> info;
+    bool wait_flag = true;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(store.timeout);
+    int seconds_int = ms.count();
+
+    PMIx_Info_load(&info[0], PMIX_WAIT, &wait_flag, PMIX_BOOL);
+    PMIx_Info_load(&info[1], PMIX_TIMEOUT, &seconds_int, PMIX_INT);
+
+    pmix_proc_t proc;
+    PMIX_PROC_CONSTRUCT(&proc);
+    PMIX_PROC_LOAD(&proc, state.proc.nspace, root);
+
+    pmix_value_t *return_val = nullptr;
+    pmix_status_t status = PMIx_Get(&proc, key, info.get(), 2, &return_val);
+    PMIX_PROC_DESTRUCT(&proc);
+
+    if (status != PMIX_SUCCESS) {
+      if (return_val)
+        PMIX_VALUE_RELEASE(return_val);
+      return (status == PMIX_ERR_TIMEOUT) ? RixaError::Timeout
+                                           : RixaError::OtherError;
+    }
+    if (!return_val) {
+      return RixaError::OtherError;
+    }
+
+    pmix_byte_object_t &bo = return_val->data.bo;
+    if (!bo.bytes) {
+      PMIX_VALUE_RELEASE(return_val);
+      return RixaError::OtherError;
+    }
+    if (bo.size > UINT32_MAX) {
+      PMIX_VALUE_RELEASE(return_val);
+      return RixaError::OtherError;
+    }
+
+    out.size = static_cast<uint32_t>(bo.size);
+    out.data = static_cast<char *>(std::malloc(out.size > 0 ? out.size : 1));
+    if (!out.data) {
+      PMIX_VALUE_RELEASE(return_val);
+      return RixaError::OtherError;
+    }
+    if (out.size > 0)
+      std::memcpy(out.data, bo.bytes, out.size);
+
+    PMIX_VALUE_RELEASE(return_val);
+  }
   return RixaError::Success;
 }
