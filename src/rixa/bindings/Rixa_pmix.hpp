@@ -68,3 +68,7 @@ RixaError rixa_wait(GlobalPMIxState &state, RixaStore &store,
 
 RixaError rixa_check(GlobalPMIxState &state, RixaStore &store, const char *key,
                      bool &out) noexcept;
+
+RixaError rixa_broadcast(GlobalPMIxState &state, RixaStore &store, uint32_t root,
+                         const char *key, const char *val, uint32_t val_len,
+                         RixaBytes &out) noexcept;

@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from rixa.pytorch import get_pmix_store
+import rixa
 
 
 def is_worker():
@@ -12,21 +12,22 @@ def is_worker():
 
 
 if is_worker():
-    store = get_pmix_store()()
-    rank = store.rank()
-    if rank == 0:
-        store.set("test_values", "1")
-    store.wait(["test_values"])
-
-    assert store.check(["test_values"])
-    assert not store.check(["test_values_not"])
-
-    print(f"WORKER_SUCCESS_RANK_{rank}")
+    store = rixa.PMIxStore(30)
+    root = 0
+    key = "test"
+    rank = store.get_rank()
+    if rank == root:
+        val = b"test_value"
+    else:
+        val = None
+    out = store.broadcast(key, val, root)
+    assert out == b"test_value"
+    print("RIXA_CPU_WORKER_CLEAN_EXIT")
     sys.exit(0)
 
 
 @pytest.mark.cpu
-def test_pmix_check(nprocs):
+def test_pmix_broadcast(nprocs):
     env = os.environ.copy()
     env["RIXA_WORKER_MODE"] = "1"
 
@@ -45,5 +46,4 @@ def test_pmix_check(nprocs):
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     assert result.returncode == 0
-    assert "WORKER_SUCCESS_RANK_0" in result.stdout
-    assert "WORKER_SUCCESS_RANK_1" in result.stdout
+    assert result.stdout.count("RIXA_CPU_WORKER_CLEAN_EXIT") == int(nprocs)

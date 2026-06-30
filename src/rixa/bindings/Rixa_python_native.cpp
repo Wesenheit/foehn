@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include<iostream>
 
 #include "Rixa_pmix.hpp"
 #include "unicodeobject.h"
@@ -226,6 +227,41 @@ static PyObject *wait_for_keys(PyObject *self, PyObject *args) {
   Py_RETURN_NONE;
 }
 
+static PyObject *pmix_broadcast(PyObject *self, PyObject *args) {
+  auto *self_pmix = reinterpret_cast<PyPMIx *>(self);
+  PyObject *key_obj, *val_obj;
+  int root = 0;
+  if (!PyArg_ParseTuple(args, "OOi", &key_obj, &val_obj, &root))
+    return nullptr;
+
+  const char *key = nullptr, *val = nullptr;
+  if (get_string_from_python(key_obj, &key) < 0) {
+    PyErr_SetString(PyExc_TypeError, "key must be str or bytes");
+    return nullptr;
+  }
+  Py_ssize_t size_val = get_string_from_python(val_obj, &val);
+  int rank = rixa_get_rank(state);
+  if (size_val < 0 && rank == root) {
+    PyErr_SetString(PyExc_TypeError, "val must be str or bytes");
+    return nullptr;
+  }
+  RixaBytes out{};
+  RixaError status = rixa_broadcast(state, self_pmix->store, root, key, val,
+                              static_cast<uint32_t>(size_val), out);
+  if (status != RixaError::Success) {
+    PyErr_Format(PyExc_RuntimeError, "(broadcast) failed to broadcast key '%s'", key);
+    return nullptr;
+  }
+  PyObject *result;
+  if (rank == root) {
+      result = PyBytes_FromStringAndSize(val, size_val);
+  }else{
+      result = PyBytes_FromStringAndSize(out.data, out.size);
+  }
+  out.free();
+  return result;
+}
+
 // ── method table
 // ──────────────────────────────────────────────────────────────
 
@@ -237,6 +273,7 @@ static PyMethodDef PMIx_methods[] = {
     {"set", pmix_set, METH_VARARGS, "Set a key-value pair"},
     {"get", pmix_get, METH_VARARGS, "Get a value for a given key"},
     {"wait", wait_for_keys, METH_VARARGS, "Wait for a list of keys"},
+    {"broadcast", pmix_broadcast, METH_VARARGS, "Broadcast a value to all processes"},
     {nullptr, nullptr, 0, nullptr}};
 
 // ── type spec (stable ABI)
