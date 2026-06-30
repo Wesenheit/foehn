@@ -221,10 +221,6 @@ RixaError rixa_broadcast(GlobalPMIxState &state, RixaStore &store,
                           uint32_t val_len, RixaBytes &out) noexcept {
   auto rank = rixa_get_rank(state);
   if (rank == root) {
-    if (val_len > 0 && !val) {
-      return RixaError::OtherError;
-    }
-
     char *val_copy = static_cast<char *>(std::malloc(val_len));
     std::memcpy(val_copy, val, val_len);
 

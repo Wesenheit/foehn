@@ -249,6 +249,7 @@ static PyObject *pmix_broadcast(PyObject *self, PyObject *args) {
   RixaError status = rixa_broadcast(state, self_pmix->store, root, key, val,
                               static_cast<uint32_t>(size_val), out);
   if (status != RixaError::Success) {
+    PMIx_Abort(1, "Fatal error occurred during broadcast, aborting!", NULL, 0);
     PyErr_Format(PyExc_RuntimeError, "(broadcast) failed to broadcast key '%s'", key);
     return nullptr;
   }
