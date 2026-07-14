@@ -20,7 +20,7 @@ if is_worker():
 
         store = rixa.PMIxStore(30)
         dev = Device(0)
-        rixa.nvshmem.init(dev, store, 30)
+        rixa.nvshmem.init(dev, store)
 
         is_init = nvshmem.init_status()
         if is_init:
