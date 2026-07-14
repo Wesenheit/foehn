@@ -34,6 +34,7 @@ if importlib.util.find_spec("torch"):
         ],
         include_dirs=["include", "src/"],
         library_dirs=torch_lib_path,
+        libraries=["pmix"],
         extra_compile_args={
             "cxx": [
                 "-std=c++17",
