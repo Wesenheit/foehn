@@ -45,8 +45,14 @@ public:
       state.init = false;
     }
   }
-
-  c10::intrusive_ptr<c10d::Store> clone() override {
+  #if (TORCH_VERSION_MAJOR > 2) || \
+      (TORCH_VERSION_MAJOR == 2 && TORCH_VERSION_MINOR > 8) || \
+      (TORCH_VERSION_MAJOR == 2 && TORCH_VERSION_MINOR == 8 && TORCH_VERSION_PATCH > 0)
+      c10::intrusive_ptr<c10d::Store> clone() override
+  #else
+    c10::intrusive_ptr<c10d::Store> clone()
+  #endif
+  {
     throw std::runtime_error("PMIxC10dStore does not support clone()");
   }
 

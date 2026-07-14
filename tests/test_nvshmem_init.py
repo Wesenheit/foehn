@@ -20,7 +20,7 @@ if is_worker():
 
         store = rixa.PMIxStore(30)
         dev = Device(0)
-        rixa.nvshmem.init(dev, store, 30)
+        rixa.nvshmem.init(dev, store)
 
         is_init = nvshmem.init_status()
         if is_init:
@@ -34,14 +34,14 @@ if is_worker():
 
 
 @pytest.mark.gpu
-def test_nvshmem_init_isolated(nprocs):
+def test_nvshmem_init_isolated(nprocs_gpu):
     env = os.environ.copy()
     env[WORKER_ENV_VAR] = "1"
 
     cmd = [
         "mpirun",
         "-n",
-        nprocs,
+        nprocs_gpu,
         "-x",
         WORKER_ENV_VAR,
         "-x",
@@ -53,7 +53,7 @@ def test_nvshmem_init_isolated(nprocs):
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     assert result.returncode == 0, f"Subprocess failed with stderr: {result.stderr}"
-    assert result.stdout.count("NVSHMEM_WORKER_CLEAN_EXIT") == int(nprocs)
+    assert result.stdout.count("NVSHMEM_WORKER_CLEAN_EXIT") == int(nprocs_gpu)
 
 
 if __name__ == "__main__":

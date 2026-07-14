@@ -47,7 +47,7 @@ default = { features = ["cpu"], solve-group = "cpu-group" }
 
 [package]
 name = "rixa"
-version = "0.0.3"
+version = "0.0.4"
 
 [package.build]
 backend = { name = "pixi-build-python", version = "*" }
@@ -58,7 +58,7 @@ noarch = false
 abi3 = true
 compilers = ["c",]
 
-[package.host-dependencies] 
+[package.host-dependencies]
 libpmix = ">=5.0"
 setuptools = "*"
 pytorch = ">=2.8.0"

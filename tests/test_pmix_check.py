@@ -15,23 +15,18 @@ if is_worker():
     store = get_pmix_store()()
     rank = store.rank()
     if rank == 0:
-        store.set("test_value_0", "1")
-    if rank == 1:
-        store.set("test_value_1", "2")
-    store.wait(["test_value_0", "test_value_1"])
+        store.set("test_values", "1")
+    store.wait(["test_values"])
 
-    val1 = store.get("test_value_0")
-    val2 = store.get("test_value_1")
-    assert val1.decode("utf-8") == "1"
-    assert val2.decode("utf-8") == "2"
+    assert store.check(["test_values"])
+    assert not store.check(["test_values_not"])
 
     print("RIXA_CPU_WORKER_CLEAN_EXIT")
-
     sys.exit(0)
 
 
 @pytest.mark.cpu
-def test_pmix_set_get_wait(nprocs):
+def test_pmix_check(nprocs):
     env = os.environ.copy()
     env["RIXA_WORKER_MODE"] = "1"
 

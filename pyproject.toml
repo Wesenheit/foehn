@@ -1,6 +1,6 @@
 [project]
 name = "rixa"
-version = "0.0.3"
+version = "0.0.4.dev0"
 description = "PMIx bootstrap method for modern AI/ML applications"
 readme = "README.md"
 requires-python = ">=3.10"

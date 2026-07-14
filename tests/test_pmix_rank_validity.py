@@ -19,7 +19,7 @@ if is_worker():
 
     assert rank >= 0
     assert rank < world
-    print(f"WORKER_SUCCESS_RANK_{rank}")
+    print("RIXA_CPU_WORKER_CLEAN_EXIT")
     sys.exit(0)
 
 
@@ -43,5 +43,4 @@ def test_pmix_rank_validity(nprocs):
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
     assert result.returncode == 0
-    assert "WORKER_SUCCESS_RANK_0" in result.stdout
-    assert "WORKER_SUCCESS_RANK_1" in result.stdout
+    assert result.stdout.count("RIXA_CPU_WORKER_CLEAN_EXIT") == int(nprocs)
