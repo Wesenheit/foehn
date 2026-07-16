@@ -12,7 +12,7 @@ core_ext = Extension(
     libraries=["pmix"],
     language="c++",
     extra_compile_args=["-O3"],
-    py_limited_api=True,
+    #py_limited_api=True,
     define_macros=[
         ("Py_LIMITED_API", "0x030A0000"),
     ],
