@@ -16,7 +16,7 @@ def is_worker():
 
 if is_worker():
     try:
-        rixa.pytorch.init_process_group("nccl")
+        rixa.pytorch.init_process_group("nccl", gpu_assign_method="none")
 
         is_init = torch.distributed.is_initialized()
 
