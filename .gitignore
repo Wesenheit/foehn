@@ -22,3 +22,5 @@ wheelhouse/
 *.so
 *.conda
 docs/_build/*
+
+*.sif
