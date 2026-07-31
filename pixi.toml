@@ -101,3 +101,7 @@ full-publish = {depends-on = ["publish", "publish-source"]}
 #docker
 docker-build = "bash scripts/build_docker.sh"
 docker-publish = "docker push ghcr.io/wesenheit/manylinux-pmix:5.0.9-aarch64 && docker push ghcr.io/wesenheit/manylinux-pmix:5.0.9-x86_64"
+
+
+#apptainer
+apptainer-build = "apptainer build rixa_25.06_5.0.9.sif scripts/apptainer/pytorch.def"

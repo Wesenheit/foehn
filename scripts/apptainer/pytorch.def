@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/pytorch:25.06-py3
+
+%files
+	scripts/build_pmix.sh /opt/build_pmix.sh
+	src /opt/rixa/src
+	pyproject.toml /opt/rixa/pyproject.toml
+	
+%post
+    set -e
+    export SETUPTOOLS_SCM_PRETEND_VERSION="0.0.4"
+	chmod +x /opt/build_pmix.sh
+    /opt/build_pmix.sh
+    rm /opt/build_pmix.sh
+    export LIBRARY_PATH=/opt/pmix/lib
+    export C_INCLUDE_PATH=/opt/pmix/include
+	
+	cd /opt/rixa
+	pip install --no-cache-dir --no-build-isolation .
