@@ -96,3 +96,8 @@ publish-source = "twine upload --repository pypi dist/*.tar.gz"
 
 full-publish-test = {depends-on = ["publish-test", "publish-source-test"]}
 full-publish = {depends-on = ["publish", "publish-source"]}
+
+
+#docker
+docker-build = "bash scripts/build_docker.sh"
+docker-publish = "docker push ghcr.io/wesenheit/manylinux-pmix:5.0.9-aarch64 && docker push ghcr.io/wesenheit/manylinux-pmix:5.0.9-x86_64"

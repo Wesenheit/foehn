@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 PMIX_VERSION="5.0.9"
-PMIX_PREFIX="/tmp/pmix"
+PMIX_PREFIX="/opt/pmix"
 BUILD_DIR="/tmp/pmix-build"
 
 echo ">>> Building PMIx v${PMIX_VERSION}"

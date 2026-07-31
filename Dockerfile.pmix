@@ -9,4 +9,4 @@ RUN chmod +x /tmp/build_pmix.sh && \
     /tmp/build_pmix.sh && \
     rm /tmp/build_pmix.sh
 
-RUN echo "/tmp/pmix/lib" > /etc/ld.so.conf.d/pmix.conf && ldconfig
+RUN echo "/opt/pmix/lib" > /etc/ld.so.conf.d/pmix.conf && ldconfig

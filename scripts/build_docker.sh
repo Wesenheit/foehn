@@ -13,6 +13,3 @@ docker buildx build \
   -f Dockerfile.pmix \
   -t ghcr.io/wesenheit/manylinux-pmix:5.0.9-x86_64 \
   .
-
-docker push ghcr.io/wesenheit/manylinux-pmix:5.0.9-aarch64
-docker push ghcr.io/wesenheit/manylinux-pmix:5.0.9-x86_64
