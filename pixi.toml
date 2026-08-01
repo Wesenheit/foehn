@@ -74,7 +74,7 @@ ci-cpu = { depends-on = ["build", "test-cpu"] }
 
 ## CLEAN AND TEST OBJECTS
 clean = "rm -rf dist/ wheelhouse/ build/"
-clean-src = "rm -r src/rixa.egg-info && rm src/rixa/*.so && rm -r src/rixa/__pycache__"
+clean-src = "rm -rf src/rixa.egg-info src/rixa/*.so src/rixa/__pycache__"
 check-wheel = "twine check wheelhouse/* "
 check-dist = "twine check dist/* "
 sdist= "python -m build --sdist"
