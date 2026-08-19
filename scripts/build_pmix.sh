@@ -14,7 +14,7 @@ cd "${BUILD_DIR}"
 
 if command -v apt-get &>/dev/null; then
     apt-get update
-    apt-get install -y --no-install-recommends libevent-dev libhwloc-dev
+    apt-get install -y --no-install-recommends libevent-dev libhwloc-dev curl build-essential
 elif command -v yum &>/dev/null; then
     yum install -y libevent-devel hwloc-devel
 elif command -v apk &>/dev/null; then

@@ -1,0 +1,26 @@
+Bootstrap: docker
+From: pytorch/pytorch:2.8.0-cuda12.9-cudnn9-runtime
+
+%files
+	scripts/build_pmix.sh /opt/build_pmix.sh
+	src /opt/rixa/src
+	pyproject.toml /opt/rixa/pyproject.toml
+    setup.py /opt/rixa/setup.py
+	
+%post
+    set -e
+	chmod +x /opt/build_pmix.sh
+    /opt/build_pmix.sh
+    rm /opt/build_pmix.sh
+    export LIBRARY_PATH=/opt/pmix/lib
+    export C_INCLUDE_PATH=/opt/pmix/include
+    export LD_LIBRARY_PATH=/opt/pmix/lib:$LD_LIBRARY_PATH
+	
+	cd /opt/rixa
+	pip install --no-cache-dir --no-build-isolation .
+
+
+%environment
+    export PMIX_PREFIX=/opt/pmix
+    export PKG_CONFIG_PATH=/opt/pmix/lib/pkgconfig
+    export LD_LIBRARY_PATH=/opt/pmix/lib:$LD_LIBRARY_PATH
