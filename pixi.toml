@@ -17,6 +17,7 @@ setuptools = ">=82.0.1,<83"
 numpy = ">2.0.0"
 ninja = ">=1.13.2,<2"
 setuptools-scm = ">=10.2.0,<11"
+jax = ">=0.10.2,<0.11"
 
 [pypi-dependencies]
 rixa = { path = ".", editable = true }

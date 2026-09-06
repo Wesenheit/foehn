@@ -39,3 +39,8 @@ if importlib.util.find_spec("nvshmem") is not None:
     from . import nvshmem
 
     __all__ += ["nvshmem"]
+
+if importlib.util.find_spec("jax") is not None:
+    from . import jax
+
+    __all__ += ["jax"]
