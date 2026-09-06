@@ -5,7 +5,7 @@
 > Expect breaking changes between versions.
 
 Rixa (Runtime Initialization by pmiX Adoption) is a high-performance library that provides a unified and efficient way to bootstrap distributed PyTorch jobs.
-It leverages PMIx 5.0 to seamlessly launch PyTorch workloads on large-scale HPC clusters, eliminating the need to manually specify the master IP address and port.
+It leverages PMIx 5.0 to seamlessly launch PyTorch/Jax workloads on large-scale HPC clusters, eliminating the need to manually specify the master IP address and port.
 
 
 ## Why Rixa?
@@ -32,6 +32,10 @@ pip install "rixa[pytorch]"
 
 # Install for NVSHMEM support
 pip install "rixa[nvshmem]"
+
+#Install for Jax support
+pip install "rixa[jax]"
+
 ```
 ## Usage
 > [!NOTE]
@@ -70,8 +74,18 @@ Remember to manually finalize the backend!
 nvshmem.finalize()
 ```
 
+### Jax
+`Jax` usage is very similar to the `nvshmem` usage, a `PMIxStore` instance is required and the initialization is straightforward:
+
+```
+import rixa
+store = rixa.PMIxStore(30)
+rixa.jax.initalize(store)
+```
+
+
 ## Roadmap
 
  - [x] Support for NVSHMEM (pytorch, cupy)
- - [ ] Support for JAX
-
+ - [x] Support for JAX
+ - [ ] ?

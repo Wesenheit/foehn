@@ -24,6 +24,7 @@ keywords = ["PMIx", "HPC", "distributed-computing", "machine-learning", "slurm"]
 [project.optional-dependencies]
 torch = ["torch>=2.8.0","numpy>=1.26","ninja"]
 nvshmem = ["nvshmem4py","numpy>=1.26"]
+jax = ["jax>=0.4.33"]
 
 [build-system]
 requires = [

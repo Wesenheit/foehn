@@ -17,7 +17,7 @@ if is_worker():
         import rixa.jax
 
         store = rixa.PMIxStore(30)
-        rixa.jax.init(store)
+        rixa.jax.initalize(store)
 
         is_init = jax.distributed.is_initialized()
         if is_init:
